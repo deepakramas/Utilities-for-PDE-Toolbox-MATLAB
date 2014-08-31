@@ -1,0 +1,1787 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>coeffsObject</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-06-08"><meta name="DC.source" content="coeffsObject.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> coeffsObject &lt; pdetbplus.formulation
+    <span class="comment">%coeffsObject Represent coefficients (c,f,a,d) for geometry</span>
+    <span class="comment">%   Use coeffsObject to specify coefficients and pass coefficients function handle</span>
+    <span class="comment">%   to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic.</span>
+    <span class="comment">%</span>
+    <span class="comment">%   coeffsObject methods:</span>
+    <span class="comment">%</span>
+    <span class="comment">%       add         - Add coefficient per region of geometry</span>
+    <span class="comment">%       getMatrices - Get area integral matrices as described in PDE Toolbox function assema</span>
+    <span class="comment">%       getJacobian - Get Jacobian of area integral matrices</span>
+    <span class="comment">%</span>
+    <span class="comment">%   coeffsObject properties:</span>
+    <span class="comment">%</span>
+    <span class="comment">%       fFunction   - Function handle for "f" coefficient as described in PDE Toolbox doc</span>
+    <span class="comment">%       cFunction   - Function handle for "c" coefficient as described in PDE Toolbox doc</span>
+    <span class="comment">%       aFunction   - Function handle for "a" coefficient as described in PDE Toolbox doc</span>
+    <span class="comment">%       dFunction   - Function handle for "d" coefficient as described in PDE Toolbox doc</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: create coeffsObject for geometry, g1 and problem output</span>
+    <span class="comment">%   dimensions = 2.</span>
+    <span class="comment">%       coeffs = coeffsObject(g1,2);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: for a 3 output dimension problem, specify "f" as [0,0,1] for region 'A' in</span>
+    <span class="comment">%   coeffsObject, coeffs.</span>
+    <span class="comment">%           function fvalue = fCoeff(x,y,u,ux,uy,time)</span>
+    <span class="comment">%               fvalue = [0,0,1];</span>
+    <span class="comment">%           end</span>
+    <span class="comment">%           coeffs.add('region','A','fiFunction',@fCoeff);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: for a scalar output problem, specify "c" for PDE term: [d/dx, d/dy]*[1,</span>
+    <span class="comment">%   -3.1;0, 4.7]*[du/dx; du/dy] for region 'A' in coeffsObject, coeffs.</span>
+    <span class="comment">%           function Cvalue = cCoeff(x,y,u,ux,uy,time)</span>
+    <span class="comment">%               Cvalue = [1,-3.1;0,4.7];</span>
+    <span class="comment">%           end</span>
+    <span class="comment">%           coeffs.add('region','A','cijFunction',@cCoeff);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: for a 2 output dimension problem, specify "a" for PDE term: [1 0; -1</span>
+    <span class="comment">%   3.3]*[u1;u2] for region 'A' in coeffsObject, coeffs.</span>
+    <span class="comment">%           function avalue = aCoeff(x,y,u,ux,uy,time)</span>
+    <span class="comment">%               avalue = [1,0; -1,3.3];</span>
+    <span class="comment">%           end</span>
+    <span class="comment">%           coeffs.add('region','A','aijFunction',@aCoeff);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: for a scalar output problem, specify "f" as 2 for region 'A' in</span>
+    <span class="comment">%   coeffsObject, coeffs.</span>
+    <span class="comment">%           coeffs.add('region','A','fConstantValue',2);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: for a 2 output dimension problem, specify "c" for PDE term [d/dx,d/dy]*[1 0</span>
+    <span class="comment">%   0 0;0 1 0 0;0 0 1 0;0 0 0 1]*[du1dx;du1dy;du2dx;du2dy] for region 'A' in</span>
+    <span class="comment">%   coeffsObject, coeffs.</span>
+    <span class="comment">%           coeffs.add('region','A','cConstantValue',1);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   Example: symbolically prescribe scalar Poisson's equation for region, 'A' in</span>
+    <span class="comment">%   coeffsObject, coeffs.</span>
+    <span class="comment">%           [equations,variables] = function symbolicPoisson()</span>
+    <span class="comment">%               syms u ddx ddy dudx dudy;</span>
+    <span class="comment">%               rho = 1.0;</span>
+    <span class="comment">%               equations = -[ddx ddy]*[rho 0;0 rho]*[dudx;dudy] + [1 2]; % the PDE</span>
+    <span class="comment">%               variables = u;</span>
+    <span class="comment">%           end</span>
+    <span class="comment">%           coeffs.add('region','A','symbolicEquationFunction',@symbolicPoisson);</span>
+    <span class="comment">%</span>
+    <span class="comment">%   See also geometryObject http://www.mathworks.com/help/pde/ug/multidimensional-coefficients.html http://www.mathworks.com/help/pde/pde-coefficients.html assema assempde adaptmesh parabolic hyperbolic boundaryConditionObject</span>
+    <span class="comment">%</span>
+    <span class="comment">%Copyright 2012 The MathWorks, Inc.</span>
+    <span class="keyword">properties</span> (Access = private)
+        coeff = cell(0);
+        triangleIndividualCoordinatesForm = false;
+        displayCoefficients = true;
+        parser = pdetbplus.parseInputArgsObject;
+    <span class="keyword">end</span>
+    <span class="keyword">properties</span> (Dependent = true,SetAccess = private)
+        <span class="comment">%fFunction Function handle for "f" coefficient as described in PDE Toolbox doc</span>
+        <span class="comment">%   fFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic</span>
+        <span class="comment">%</span>
+        <span class="comment">%   Example: pass fFunction from coeffObject, coeffs, to PDE Toolbox function assempde</span>
+        <span class="comment">%       assempde(...,coeffs.fFunction,...);</span>
+        <span class="comment">%</span>
+        <span class="comment">%   See also assempde adaptmesh parabolic hyperbolic</span>
+        fFunction;
+        <span class="comment">%cFunction Function handle for "c" coefficient as described in PDE Toolbox doc</span>
+        <span class="comment">%   cFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic</span>
+        <span class="comment">%</span>
+        <span class="comment">%   Example: pass cFunction from coeffObject, coeffs, to PDE Toolbox function assempde</span>
+        <span class="comment">%       assempde(...,coeffs.cFunction,...);</span>
+        <span class="comment">%</span>
+        <span class="comment">%   See also assempde adaptmesh parabolic hyperbolic</span>
+        cFunction;
+        <span class="comment">%aFunction Function handle for "a" coefficient as described in PDE Toolbox doc</span>
+        <span class="comment">%   aFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic</span>
+        <span class="comment">%</span>
+        <span class="comment">%   Example: pass aFunction from coeffObject, coeffs, to PDE Toolbox function assempde</span>
+        <span class="comment">%       assempde(...,coeffs.aFunction,...);</span>
+        <span class="comment">%</span>
+        <span class="comment">%   See also assempde adaptmesh parabolic hyperbolic</span>
+        aFunction;
+        <span class="comment">%dFunction Function handle for "d" coefficient as described in PDE Toolbox doc</span>
+        <span class="comment">%   dFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic</span>
+        <span class="comment">%</span>
+        <span class="comment">%   Example: pass dFunction from coeffObject, coeffs, to PDE Toolbox function assempde</span>
+        <span class="comment">%       assempde(...,coeffs.dFunction,...);</span>
+        <span class="comment">%</span>
+        <span class="comment">%   See also assempde adaptmesh parabolic hyperbolic</span>
+        dFunction;
+    <span class="keyword">end</span>
+    <span class="keyword">methods</span>
+        <span class="keyword">function</span> self = coeffsObject(geometry, dimension)
+            <span class="comment">%coeffsObject Create PDE coefficients object</span>
+            <span class="comment">%   coeffsObject(geometry, dimension) returns a coeffsObject</span>
+            <span class="comment">%   instance for input: geometryObject, geometry and dimension = #output Dimension of</span>
+            <span class="comment">%   problem.</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: create coeffsObject for geometry, g1 and problem output</span>
+            <span class="comment">%   dimensions = 2.</span>
+            <span class="comment">%       coeffs = coeffsObject(g1,2);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   See also geometryObject boundaryConditionObject.</span>
+            self = self@pdetbplus.formulation(geometry, dimension);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> add(self,varargin)
+            <span class="comment">%add Add coefficient per region of geometry</span>
+            <span class="comment">%   add(PARAM1,VALUE1,PARAM2,VALUE2,...) adds coefficients for a region to</span>
+            <span class="comment">%   coeffsObject instance. PARAM can be:</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'region' : Name of region to which coefficient applies as char.</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'fiFunction' : Function handle for setting the "f" coefficient value at element centroid. The format</span>
+            <span class="comment">%       for fiFunction is -</span>
+            <span class="comment">%           function fi = fCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids</span>
+            <span class="comment">%               N = #output dimensions</span>
+            <span class="comment">%               % x,y are the position coordinates. u is the solution, ux and uy are the</span>
+            <span class="comment">%               % direction derivatives of u.</span>
+            <span class="comment">%               % fi is an N length vector; nth row corresponds to entry for nth</span>
+            <span class="comment">%               % output equation</span>
+            <span class="comment">%               fi = N X 1 vector; % Can be sparse.</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'cijFunction' : Function handle for setting the "c" coefficient value at element centroid. The format</span>
+            <span class="comment">%       for cijFunction is -</span>
+            <span class="comment">%           function C = cCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids</span>
+            <span class="comment">%               % C is an 2N x 2N matrix. C is an N-by-N matrix of 2-by-2 blocks as per the PDE</span>
+            <span class="comment">%               % Toolbox documentation ("logical" 2N X 2N C matrix -</span>
+            <span class="comment">%               % http://www.mathworks.com/help/pde/ug/c.html)</span>
+            <span class="comment">%               C = 2N X 2N matrix; % Can be sparse</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'aijFunction' OR 'dijFunction' : Function handle for setting the "a" or "d"</span>
+            <span class="comment">%       coefficient at element centroid. The format for the aijFunction/dijFunction is -</span>
+            <span class="comment">%           function aij = aCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids</span>
+            <span class="comment">%               % aij is an N x N matrix; (m,n) entry in aij corresponds to the</span>
+            <span class="comment">%               % contribution of the nth output dimension variable to mth output</span>
+            <span class="comment">%               % equation</span>
+            <span class="comment">%               aij = N X N matrix. % Can be sparse</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'fConstantValue' : Scalar or vector value for the "f" coefficient. In the scalar</span>
+            <span class="comment">%       case, the same value is applied for all output dimensions. The vector value is</span>
+            <span class="comment">%       of size #output dimensions x 1.</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'cConstantValue', 'aConstantValue', 'dConstantValue' : Scalar or vector value</span>
+            <span class="comment">%       for the diagonal of the "c"/"a"/"d" coefficient matrix. In the scalar case, the</span>
+            <span class="comment">%       value is set to be same for all diagonal terms e.g. d/dx (.) d/dx and d/dy (.)</span>
+            <span class="comment">%       d/dy for 'cConstantValue' for all output dimensions where (.) denotes the</span>
+            <span class="comment">%       coefficient. The vector value is the diagonal of the coefficient matrix and is</span>
+            <span class="comment">%       #output dimensions X 1 long for 'aConstantValue' and 'dConstantValue' and</span>
+            <span class="comment">%       2*#output dimensions X 1 long for 'cConstantValue';</span>
+            <span class="comment">%</span>
+            <span class="comment">%       'symbolicEquationFunction' : Function handle that describes equations</span>
+            <span class="comment">%       symbolically using the Symbolic Math Toolbox. A license of Symbolic Math Toolbox</span>
+            <span class="comment">%       is required. Format for is -</span>
+            <span class="comment">%           function [equations,variables] = fooSymbolicEquations</span>
+            <span class="comment">%               equations = array of symbolic equations representing PDE;</span>
+            <span class="comment">%               variables = variables of PDE;</span>
+            <span class="comment">%               % Reserved keywords: x,y,time,ddx,ddy,d[variable]dx,d[variable]dy</span>
+            <span class="comment">%               % Specify the Div operator as [ddx ddy]</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: for a 3 output dimension problem, specify "f" as [0,0,1] for region 'A' in</span>
+            <span class="comment">%   coeffsObject, coeffs.</span>
+            <span class="comment">%           function fvalue = fCoeff(x,y,u,ux,uy,time)</span>
+            <span class="comment">%               fvalue = [0,0,1];</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%           coeffs.add('region','A','fiFunction',@fCoeff);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: for a scalar output problem, specify "c" for PDE term: [d/dx, d/dy]*[1,</span>
+            <span class="comment">%   -3.1;0, 4.7]*[du/dx; du/dy] for region 'A' in coeffsObject, coeffs.</span>
+            <span class="comment">%           function Cvalue = cCoeff(x,y,u,ux,uy,time)</span>
+            <span class="comment">%               Cvalue = [1,-3.1;0,4.7];</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%           coeffs.add('region','A','cijFunction',@cCoeff);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: for a 2 output dimension problem, specify "a" for PDE term: [1 0; -1</span>
+            <span class="comment">%   3.3]*[u1;u2] for region 'A' in coeffsObject, coeffs.</span>
+            <span class="comment">%           function avalue = aCoeff(x,y,u,ux,uy,time)</span>
+            <span class="comment">%               avalue = [1,0; -1,3.3];</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%           coeffs.add('region','A','aijFunction',@aCoeff);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: for a scalar output problem, specify "f" as 2 for region 'A' in</span>
+            <span class="comment">%   coeffsObject, coeffs.</span>
+            <span class="comment">%           coeffs.add('region','A','fConstantValue',2);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: for a 2 output dimension problem, specify "c" for PDE term [d/dx,d/dy]*[1 0</span>
+            <span class="comment">%   0 0;0 1 0 0;0 0 1 0;0 0 0 1]*[du1dx;du1dy;du2dx;du2dy] for region 'A' in</span>
+            <span class="comment">%   coeffsObject, coeffs.</span>
+            <span class="comment">%           coeffs.add('region','A','cConstantValue',1);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: symbolically prescribe scalar Poisson's equation for region, 'A' in</span>
+            <span class="comment">%   coeffsObject, coeffs.</span>
+            <span class="comment">%           [equations,variables] = function symbolicPoisson()</span>
+            <span class="comment">%               syms u ddx ddy dudx dudy;</span>
+            <span class="comment">%               rho = 1.0;</span>
+            <span class="comment">%               equations = -[ddx ddy]*[rho 0;0 rho]*[dudx;dudy] + [1 2]; % the PDE</span>
+            <span class="comment">%               variables = u;</span>
+            <span class="comment">%           end</span>
+            <span class="comment">%           coeffs.add('region','A','symbolicEquationFunction',@symbolicPoisson);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   See also http://www.mathworks.com/help/pde/ug/c.html http://www.mathworks.com/help/pde/ug/multidimensional-coefficients.html</span>
+            ps = self.parser.parseInputArgs(varargin{:});
+            self.coeff{end+1}.region = ps.Results.region;
+            <span class="keyword">if</span> ~isempty(ps.Results.fConstantValue)
+                fConstantValue = ps.Results.fConstantValue;
+                fiConstantFunction = @(xc,yc,uc,uxc,uyc,time) self.fiConstantFunctionHelper(fConstantValue,self.dimension);
+                self.coeff{end}.fiFunction = fiConstantFunction;
+            <span class="keyword">else</span>
+                self.coeff{end}.fiFunction = ps.Results.fiFunction;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> ~isempty(ps.Results.cConstantValue)
+                cConstantValue = ps.Results.cConstantValue;
+                cijConstantDiagFunction = @(xc,yc,uc,uxc,uyc,time) self.cijConstantDiagFunctionHelper(cConstantValue,self.dimension);
+                self.coeff{end}.cijFunction = cijConstantDiagFunction;
+            <span class="keyword">else</span>
+               self.coeff{end}.cijFunction = ps.Results.cijFunction;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> ~isempty(ps.Results.aConstantValue)
+                aConstantValue = ps.Results.aConstantValue;
+                aijConstantDiagFunction = @(xc,yc,uc,uxc,uyc,time) self.aijConstantDiagFunctionHelper(aConstantValue,self.dimension);
+                self.coeff{end}.aijFunction = aijConstantDiagFunction;
+            <span class="keyword">else</span>
+               self.coeff{end}.aijFunction = ps.Results.aijFunction;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> ~isempty(ps.Results.dConstantValue)
+                dConstantValue = ps.Results.dConstantValue;
+                dijConstantDiagFunction = @(xc,yc,uc,uxc,uyc,time) self.aijConstantDiagFunctionHelper(dConstantValue,self.dimension);
+                self.coeff{end}.dijFunction = dijConstantDiagFunction;
+            <span class="keyword">else</span>
+               self.coeff{end}.dijFunction = ps.Results.dijFunction;
+            <span class="keyword">end</span>
+
+            self.coeff{end}.symbolicEquationFunction = ps.Results.symbolicEquationFunction;
+            self.coeff{end}.jcFunction = [];
+            self.coeff{end}.jaFunction = [];
+            self.coeff{end}.jdFunction = [];
+            self.coeff{end}.f = cell(self.dimension,1);
+
+            <span class="keyword">if</span> ~isempty(self.coeff{end}.symbolicEquationFunction)
+                [equations,variables] = self.coeff{end}.symbolicEquationFunction();
+                [mfC,mfA,mfF,mfD,jfC,jfA,jfD] = self.generateMatrixFunctionsFromSymbolic(<span class="string">'index'</span>,length(self.coeff),<span class="string">'equations'</span>,equations,<span class="string">'variables'</span>,variables,<span class="string">'displayCoefficients'</span>,self.displayCoefficients);
+                <span class="keyword">if</span> isempty(self.coeff{end}.cijFunction) &amp;&amp; ~isempty(mfC)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfC,2,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.cijFunction = tempF;
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(jfC,2,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.jcFunction = tempF;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> isempty(self.coeff{end}.aijFunction) &amp;&amp; ~isempty(mfA)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfA,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.aijFunction = tempF;
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(jfA,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.jaFunction = tempF;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> isempty(self.coeff{end}.dijFunction) &amp;&amp; ~isempty(mfD)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfD,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.dijFunction = tempF;
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(jfD,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.jdFunction = tempF;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> isempty(self.coeff{end}.fiFunction) &amp;&amp; ~isempty(mfF)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfF,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.fiFunction = tempF;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> ff = get.fFunction(self)
+            ff = @self.fFunction_impl;
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> cf = get.cFunction(self)
+            cf = @self.cFunction_impl;
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> df = get.dFunction(self)
+            df = @self.dFunction_impl;
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> af = get.aFunction(self)
+            af = @self.aFunction_impl;
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [cMatrix,aMatrix,dMatrix,F] = getMatrices(self,varargin)
+            <span class="comment">%getMatrices Get area integral matrices as described in PDE Toolbox function assema</span>
+            <span class="comment">%   [cMatrix,aMatrix,dMatrix,F] = getMatrices(PARAM1,VALUE1,PARAM2,VALUE2,...) where PARAM can be:</span>
+            <span class="comment">%       'u'   : Output variable of PDE as an array (#Dimensions X #Nodes) long.</span>
+            <span class="comment">%       'time': Value of time as double.</span>
+            <span class="comment">%       'p','e','t': Values of externally specified mesh of structure as described in initmesh.</span>
+            <span class="comment">%</span>
+            <span class="comment">%   Example: Get cMatrix,aMatrix,F matrices corresponding to u = u0 for coeffsObject, coeffs.</span>
+            <span class="comment">%       [cMatrix,aMatrix,F] = coeffs.getMatrices('u',u0);</span>
+            <span class="comment">%</span>
+            <span class="comment">%   See also assema initmesh meshObject.</span>
+            ps = self.parser.parseInputArgs(varargin{:});
+            u = ps.Results.u;
+            time = ps.Results.time;
+            p = ps.Results.p;
+            t = ps.Results.t;
+            <span class="keyword">if</span> isempty(p)
+                p = self.geometry.mesh.p;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> isempty(t)
+                t = self.geometry.mesh.t;
+            <span class="keyword">end</span>
+            dMatrix = [];
+            <span class="keyword">if</span> isempty(u) &amp;&amp; isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction);
+                <span class="keyword">if</span> ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[]);
+                <span class="keyword">end</span>
+            <span class="keyword">elseif</span> isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction,u);
+                <span class="keyword">if</span> ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[],u);
+                <span class="keyword">end</span>
+            <span class="keyword">elseif</span> isempty(u)
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction,time);
+                <span class="keyword">if</span> ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[],time);
+                <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction,u,time);
+                <span class="keyword">if</span> ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[],u,time);
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [cMatrix,aMatrix,dMatrix,F] = getJacobian(self,varargin)
+           <span class="comment">%getJacobian Get Jacobian of area integral matrices</span>
+            <span class="comment">%   [K,M,F] = getJacobian(PARAM1,VALUE1,PARAM2,VALUE2,...) where PARAM can be:</span>
+            <span class="comment">%       'u'   : Output variable of PDE as an array (#Dimensions X #Nodes) long.</span>
+            <span class="comment">%       'time': Value of time as double.</span>
+            <span class="comment">%       'p','e','t': Values of externally specified mesh of structure as described in initmesh.</span>
+            <span class="comment">%   getJacobian is applicable only for the case when the 'symbolicEquationFunction'</span>
+            <span class="comment">%   input is used and is useful only when both the PDE is nonlinear and a custom</span>
+            <span class="comment">%   nonlinear solver is used.</span>
+            <span class="comment">%</span>
+            ps = self.parser.parseInputArgs(varargin{:});
+            u = ps.Results.u;
+            time = ps.Results.time;
+            p = ps.Results.p;
+            t = ps.Results.t;
+            <span class="keyword">if</span> isempty(p)
+                p = self.geometry.mesh.p;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> isempty(t)
+                t = self.geometry.mesh.t;
+            <span class="keyword">end</span>
+            dMatrix = [];
+            <span class="keyword">if</span> isempty(u) &amp;&amp; isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction);
+            <span class="keyword">elseif</span> isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction,u);
+            <span class="keyword">elseif</span> isempty(u)
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction,time);
+            <span class="keyword">else</span>
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction,u,time);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">methods</span>(Hidden = true)
+        <span class="keyword">function</span> [c] = jcFunction(self,p,t,u,time)
+            c = self.cGeneralFunction_impl(p,t,u,time,false);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [a] = jaFunction(self,p,t,u,time)
+            a = self.aGeneralFunction_impl(p,t,u,time,false);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">methods</span>(Access = private, Hidden = true)
+        <span class="keyword">function</span> [f] = fFunction_impl(self,p,t,u,time)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            f = zeros(N,nt);
+            <span class="comment">% Triangle point indices</span>
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            <span class="comment">% Find centroids of triangles</span>
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            <span class="keyword">if</span> ~isempty(u)
+                uintrp = pdeintrp(p,t,u); <span class="comment">% Interpolated values at centroids</span>
+                uintrp = reshape(uintrp,[],N); <span class="comment">% matrix with N column</span>
+                uintrp = uintrp'; <span class="comment">% change to row vectors</span>
+                [ux,uy] = pdegrad(p,t,u); <span class="comment">% Approximate derivatives</span>
+            <span class="keyword">else</span>
+                uintrp = [];
+                ux = [];
+                uy = [];
+            <span class="keyword">end</span>
+            <span class="keyword">for</span> cix=1:length(self.coeff)
+                fiFunction = self.coeff{cix}.fiFunction;
+                <span class="keyword">if</span> ~isempty(fiFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    <span class="keyword">if</span> ix
+                        xc = xpts(ix);
+                        yc = ypts(ix);
+                        <span class="keyword">if</span> ~isempty(u)
+                            uc = uintrp(:,ix);
+                            uxc = ux(:,ix);
+                            uyc = uy(:,ix);
+                        <span class="keyword">end</span>
+                        <span class="keyword">for</span> k=1:length(xc)
+                            <span class="keyword">if</span> ~isempty(u)
+                                <span class="keyword">if</span> ~self.triangleIndividualCoordinatesForm
+                                    fi = fiFunction(xc(k),yc(k),uc(:,k),uxc(:,k),uyc(:,k),time);
+                                <span class="keyword">else</span>
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    fi = fiFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],uc(:,k),uxc(:,k),uyc(:,k),time);
+                                <span class="keyword">end</span>
+                            <span class="keyword">else</span>
+                                <span class="keyword">if</span> ~self.triangleIndividualCoordinatesForm
+                                    fi = fiFunction(xc(k),yc(k),[],[],[],time);
+                                <span class="keyword">else</span>
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    fi = fiFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],[],[],[],time);
+                                <span class="keyword">end</span>
+                            <span class="keyword">end</span>
+                            <span class="keyword">for</span> n=1:N
+                                f(n,ix(k)) = fi(n);
+                            <span class="keyword">end</span>
+                        <span class="keyword">end</span>
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [c] = cFunction_impl(self,p,t,u,time)
+            c = self.cGeneralFunction_impl(p,t,u,time,true);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [d] = dFunction_impl(self,p,t,u,time)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            d = zeros(N*N,nt);
+            <span class="comment">% Triangle point indices</span>
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            <span class="comment">% Find centroids of triangles</span>
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            <span class="keyword">if</span> ~isempty(u)
+                uintrp = pdeintrp(p,t,u); <span class="comment">% Interpolated values at centroids</span>
+                uintrp = reshape(uintrp,[],N); <span class="comment">% matrix with N column</span>
+                uintrp = uintrp'; <span class="comment">% change to row vectors</span>
+                [ux,uy] = pdegrad(p,t,u); <span class="comment">% Approximate derivatives</span>
+            <span class="keyword">else</span>
+                uintrp = [];
+                ux = [];
+                uy = [];
+            <span class="keyword">end</span>
+            <span class="keyword">for</span> cix=1:length(self.coeff)
+                dijFunction = self.coeff{cix}.dijFunction;
+                <span class="keyword">if</span> ~isempty(dijFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    <span class="keyword">if</span> ix
+                        xc = xpts(ix);
+                        yc = ypts(ix);
+                        <span class="keyword">if</span> ~isempty(u)
+                            uc = uintrp(:,ix);
+                            uxc = ux(:,ix);
+                            uyc = uy(:,ix);
+                        <span class="keyword">end</span>
+                        <span class="keyword">for</span> k=1:length(xc)
+                            <span class="keyword">if</span> ~isempty(u)
+                                <span class="keyword">if</span> ~self.triangleIndividualCoordinatesForm
+                                    dij = dijFunction(xc(k),yc(k),uc(:,k),uxc(:,k),uyc(:,k),time);
+                                <span class="keyword">else</span>
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    dij = dijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],uc(:,k),uxc(:,k),uyc(:,k),time);
+                                <span class="keyword">end</span>
+                            <span class="keyword">else</span>
+                                <span class="keyword">if</span> ~self.triangleIndividualCoordinatesForm
+                                    dij = dijFunction(xc(k),yc(k),[],[],[],time);
+                                <span class="keyword">else</span>
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    dij = dijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],[],[],[],time);
+                                <span class="keyword">end</span>
+                            <span class="keyword">end</span>
+                            d(:,ix(k)) = dij(:);
+                        <span class="keyword">end</span>
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [c] = cGeneralFunction_impl(self,p,t,u,time,iscFunction)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            c = zeros(4*N^2,nt);
+            <span class="comment">% Triangle point indices</span>
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            <span class="comment">% Find centroids of triangles</span>
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            <span class="keyword">if</span> ~isempty(u)
+                uintrp = pdeintrp(p,t,u); <span class="comment">% Interpolated values at centroids</span>
+                uintrp = reshape(uintrp,[],N); <span class="comment">% matrix with N column</span>
+                uintrp = uintrp'; <span class="comment">% change to row vectors</span>
+                [ux,uy] = pdegrad(p,t,u); <span class="comment">% Approximate derivatives</span>
+            <span class="keyword">else</span>
+                uintrp = [];
+                ux = [];
+                uy = [];
+            <span class="keyword">end</span>
+            <span class="keyword">for</span> cix=1:length(self.coeff)
+                cijFunction = self.coeff{cix}.cijFunction;
+                <span class="keyword">if</span> ~iscFunction
+                    cijFunction = self.coeff{cix}.jcFunction;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> ~isempty(cijFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    <span class="keyword">if</span> ix
+                        <span class="keyword">for</span> k=ix
+                            <span class="keyword">if</span> ~isempty(u)
+                                cij = cijFunction(xpts(k),ypts(k),uintrp(:,k),ux(:,k),uy(:,k),time);
+                            <span class="keyword">else</span>
+                                cij = cijFunction(xpts(k),ypts(k),[],[],[],time);
+                            <span class="keyword">end</span>
+                            count = 1;
+                            <span class="keyword">for</span> n=1:N
+                                <span class="keyword">for</span> m=1:N
+                                    c(count,k) = cij(2*(m-1)+1, 2*(n-1)+1);
+                                    count = count + 1;
+                                    c(count,k) = cij(2*(m-1)+2, 2*(n-1)+1);
+                                    count = count + 1;
+                                    c(count,k) = cij(2*(m-1)+1, 2*(n-1)+2);
+                                    count = count + 1;
+                                    c(count,k) = cij(2*(m-1)+2, 2*(n-1)+2);
+                                    count = count+1;
+                                <span class="keyword">end</span>
+                            <span class="keyword">end</span>
+                        <span class="keyword">end</span>
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [a] = aFunction_impl(self,p,t,u,time)
+            a = self.aGeneralFunction_impl(p,t,u,time,true);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [a] = aGeneralFunction_impl(self,p,t,u,time,isaFunction)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            a = zeros(N*N,nt);
+            <span class="comment">% Triangle point indices</span>
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            <span class="comment">% Find centroids of triangles</span>
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            <span class="keyword">if</span> ~isempty(u)
+                uintrp = pdeintrp(p,t,u); <span class="comment">% Interpolated values at centroids</span>
+                uintrp = reshape(uintrp,[],N); <span class="comment">% matrix with N column</span>
+                uintrp = uintrp'; <span class="comment">% change to row vectors</span>
+                [ux,uy] = pdegrad(p,t,u); <span class="comment">% Approximate derivatives</span>
+            <span class="keyword">else</span>
+                uintrp = [];
+                ux = [];
+                uy = [];
+            <span class="keyword">end</span>
+            <span class="keyword">for</span> cix=1:length(self.coeff)
+                aijFunction = self.coeff{cix}.aijFunction;
+                <span class="keyword">if</span> ~isaFunction
+                    aijFunction = self.coeff{cix}.jaFunction;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> ~isempty(aijFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    <span class="keyword">if</span> ix
+                        xc = xpts(ix);
+                        yc = ypts(ix);
+                        <span class="keyword">if</span> ~isempty(u)
+                            uc = uintrp(:,ix);
+                            uxc = ux(:,ix);
+                            uyc = uy(:,ix);
+                        <span class="keyword">end</span>
+                        <span class="keyword">for</span> k=1:length(xc)
+                            <span class="keyword">if</span> ~isempty(u)
+                                <span class="keyword">if</span> ~self.triangleIndividualCoordinatesForm
+                                    aij = aijFunction(xc(k),yc(k),uc(:,k),uxc(:,k),uyc(:,k),time);
+                                <span class="keyword">else</span>
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    aij = aijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],uc(:,k),uxc(:,k),uyc(:,k),time);
+                                <span class="keyword">end</span>
+                            <span class="keyword">else</span>
+                                <span class="keyword">if</span> ~self.triangleIndividualCoordinatesForm
+                                    aij = aijFunction(xc(k),yc(k),[],[],[],time);
+                                <span class="keyword">else</span>
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    aij = aijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],[],[],[],time);
+                                <span class="keyword">end</span>
+                            <span class="keyword">end</span>
+                            a(:,ix(k)) = aij(:);
+                        <span class="keyword">end</span>
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">methods</span>(Static, Hidden = true)
+        <span class="keyword">function</span> [cij] = cijConstantDiagFunctionHelper(cVal,N)
+            cij = sparse(2*N,2*N);
+            <span class="keyword">if</span> ~isscalar(cVal)
+                <span class="keyword">for</span> n=1:size(cij,1)
+                    cij(n,n) = cVal(n);
+                <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                <span class="keyword">for</span> n=1:size(cij,1)
+                    cij(n,n) = cVal;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> fi = fiConstantFunctionHelper(fVal,N)
+            <span class="keyword">if</span> isscalar(fVal)
+                fi = fVal*ones(N,1);
+            <span class="keyword">else</span>
+                fi = fVal;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [aij] = aijConstantDiagFunctionHelper(aVal,N)
+            aij = sparse(N,N);
+            <span class="keyword">if</span> ~isscalar(aVal)
+                <span class="keyword">for</span> n=1:size(aij,1)
+                    aij(n,n) = aVal(n);
+                <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                <span class="keyword">for</span> n=1:size(aij,1)
+                    aij(n,n) = aVal;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">methods</span>(Static,Access = private)
+        <span class="keyword">function</span> fi = zeroFFunction(N)
+            fi = zeros(N,1);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> cij = coeffFromSymbolicEquation(mfC,intFactor,N,x,y,u,ux,uy,time)
+            <span class="keyword">if</span> isempty(time)
+                time = 0;
+            <span class="keyword">end</span>
+            uxy = zeros(2*N,1);
+            <span class="keyword">if</span> isempty(u)
+                u = zeros(N,1);
+            <span class="keyword">else</span>
+                uxy(1:2:end-1,1) = ux;
+                uxy(2:2:end,1) = uy;
+            <span class="keyword">end</span>
+            ucell = num2cell(u);
+            uxycell = num2cell(uxy);
+            cij = mfC(x,y,time,ucell{:},uxycell{:});
+<span class="comment">%             switch length(u)</span>
+<span class="comment">%                 case 1</span>
+<span class="comment">%                     if isempty(u)</span>
+<span class="comment">%                         cij = mfC(x,y,time,0,0,0);</span>
+<span class="comment">%                     else</span>
+<span class="comment">%                         cij = mfC(x,y,time,u(1),ux(1),uy(1));</span>
+<span class="comment">%                     end</span>
+<span class="comment">%                 case 2</span>
+<span class="comment">%                     if isempty(u)</span>
+<span class="comment">%                         cij = mfC(x,y,time,0,0,0,0,0,0);</span>
+<span class="comment">%                     else</span>
+<span class="comment">%                         cij = mfC(x,y,time,u(1),u(2),ux(1),uy(1),ux(2),uy(2));</span>
+<span class="comment">%                     end</span>
+<span class="comment">%                 case 3</span>
+<span class="comment">%                     if isempty(u)</span>
+<span class="comment">%                         cij = mfC(x,y,time,0,0,0,0,0,0,0,0,0);</span>
+<span class="comment">%                     else</span>
+<span class="comment">%                         cij = mfC(x,y,time,u(1),u(2),u(3),ux(1),uy(1),ux(2),uy(2),ux(3),uy(3));</span>
+<span class="comment">%                     end</span>
+<span class="comment">%                 case 4</span>
+<span class="comment">%                     if isempty(u)</span>
+<span class="comment">%                         cij = mfC(x,y,time,0,0,0,0,0,0,0,0,0,0,0,0);</span>
+<span class="comment">%                     else</span>
+<span class="comment">%                         cij = mfC(x,y,time,u(1),u(2),u(3),u(4),ux(1),uy(1),ux(2),uy(2),ux(3),uy(3),ux(4),uy(4));</span>
+<span class="comment">%                     end</span>
+<span class="comment">%                 case 5</span>
+<span class="comment">%                     if isempty(u)</span>
+<span class="comment">%                         cij = mfC(x,y,time,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);</span>
+<span class="comment">%                     else</span>
+<span class="comment">%                         cij = mfC(x,y,time,u(1),u(2),u(3),u(4),u(5),ux(1),uy(1),ux(2),uy(2),ux(3),uy(3),ux(4),uy(4),ux(5),uy(5));</span>
+<span class="comment">%                     end</span>
+<span class="comment">%             end</span>
+            cij = reshape(cij,intFactor*N,[]);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> [mfC,mfA,mfF,mfD,jfC,jfA,jfD] = generateMatrixFunctionsFromSymbolic(varargin)
+            equations = [];
+            variables = [];
+            index = 1;
+            displayCoefficients = true;
+            <span class="keyword">for</span> k=1:2:length(varargin)
+                a = varargin(k);
+                b = varargin(k+1);
+                <span class="keyword">if</span> strcmp(a,<span class="string">'equations'</span>)
+                    equations = b{1};
+                <span class="keyword">elseif</span> strcmp(a,<span class="string">'variables'</span>)
+                    variables = b{1};
+                <span class="keyword">elseif</span> strcmp(a,<span class="string">'index'</span>)
+                    index = b{1};
+                <span class="keyword">elseif</span> strcmp(a,<span class="string">'displayCoefficients'</span>)
+                    displayCoefficients = b{1};
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            uprime = sym(zeros(1,length(variables)*2));
+            ddt = sym(zeros(1,length(variables)));
+            d2d2t = sym(zeros(1,length(variables)));
+            <span class="keyword">for</span> k=1:length(variables)
+                uprime(2*k-1) = sym(strcat(<span class="string">'d'</span>,char(variables(k)),<span class="string">'dx'</span>));
+                uprime(2*k) = sym(strcat(<span class="string">'d'</span>,char(variables(k)),<span class="string">'dy'</span>));
+                ddt(k) = sym(strcat(<span class="string">'d'</span>,char(variables(k)),<span class="string">'dt'</span>));
+                d2d2t(k) = sym(strcat(<span class="string">'d2'</span>,char(variables(k)),<span class="string">'d2t'</span>));
+            <span class="keyword">end</span>
+            variablesPlus = [sym(<span class="string">'x'</span>) sym(<span class="string">'y'</span>) sym(<span class="string">'time'</span>) variables uprime];
+            <span class="comment">% extract ddt* and d2dt* terms</span>
+            nond2d2tequations = subs(equations,d2d2t,0*d2d2t);
+            Dequations = equations - nond2d2tequations;
+            equations = nond2d2tequations;
+            <span class="keyword">if</span> ~isempty(find(Dequations ~= 0,1))
+                D = pdetbplus.coeffsObject.extractDMatrix(Dequations,d2d2t,displayCoefficients);
+                filename = strcat(<span class="string">'Dfunction'</span>,num2str(index));
+                mfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(D,variablesPlus,filename);
+                jD = jacobian(D*d2d2t.',d2d2t);
+                filename = strcat(<span class="string">'jDfunction'</span>,num2str(index));
+                jfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jD,variablesPlus,filename);
+            <span class="keyword">else</span>
+                nonddtequations = subs(equations,ddt,0*ddt);
+                Dequations = equations - nonddtequations;
+                equations = nonddtequations;
+                <span class="keyword">if</span> ~isempty(find(Dequations ~= 0,1))
+                    D = pdetbplus.coeffsObject.extractDMatrix(Dequations,ddt,displayCoefficients);
+                    filename = strcat(<span class="string">'Dfunction'</span>,num2str(index));
+                    mfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(D,variablesPlus,filename);
+                    jD = jacobian(D*ddt.',ddt);
+                    filename = strcat(<span class="string">'jDfunction'</span>,num2str(index));
+                    jfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jD,variablesPlus,filename);
+                <span class="keyword">else</span>
+                    mfD = [];
+                    jfD = [];
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            <span class="comment">% extract ddx*, ddy* terms, C matrix</span>
+            nonCequations = subs(equations,[sym(<span class="string">'ddx'</span>),sym(<span class="string">'ddy'</span>)],[0,0]);
+            Cequations = -(equations - nonCequations); <span class="comment">% "-" because the Div template expects this form</span>
+            C = pdetbplus.coeffsObject.extractCMatrix(Cequations,uprime,displayCoefficients);
+            filename = strcat(<span class="string">'Cfunction'</span>,num2str(index));
+            mfC = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(C,variablesPlus,filename);
+            jC = jacobian(C*uprime.',uprime);
+            filename = strcat(<span class="string">'jCfunction'</span>,num2str(index));
+            jfC = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jC,variablesPlus,filename);
+            <span class="comment">% extract F vector</span>
+            Fequations = -subs(nonCequations,variables,0*variables); <span class="comment">% "-" because "f" needs to be on the RHS</span>
+            <span class="keyword">if</span> displayCoefficients
+                display <span class="string">Fvector</span>; pretty(sym(Fequations));
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> ~isempty(find(Fequations ~= 0,1))
+                filename = strcat(<span class="string">'Ffunction'</span>,num2str(index));
+                mfF = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(Fequations,variablesPlus,filename);
+            <span class="keyword">else</span>
+                mfF = [];
+            <span class="keyword">end</span>
+            <span class="comment">% extract A matrix</span>
+            Aequations = (nonCequations - Fequations);
+            <span class="keyword">if</span> ~isempty(find(Aequations ~= 0,1))
+                A = pdetbplus.coeffsObject.extractAMatrix(Aequations,variables,displayCoefficients);
+                filename = strcat(<span class="string">'Afunction'</span>,num2str(index));
+                mfA = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(A,variablesPlus,filename);
+                jA = jacobian(A*variables.',variables);
+                filename = strcat(<span class="string">'jAfunction'</span>,num2str(index));
+                jfA = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jA,variablesPlus,filename);
+            <span class="keyword">else</span>
+                mfA = [];
+                jfA = [];
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> C = extractCMatrix(equations,uprime,displayCoefficients)
+            M = equationsToMatrix(equations,[sym(<span class="string">'ddx'</span>) sym(<span class="string">'ddy'</span>)]);
+            <span class="comment">% M is a N x 2 matrix; we convert this to a 2N vector</span>
+            Mt = M.';
+            Mvec = Mt(:);
+            [Num,Den] = numden(Mvec);
+            C = sym(zeros(length(Num),length(Num)));
+            <span class="keyword">for</span> k=1:size(C,1) <span class="comment">% loop over rows of M2</span>
+                <span class="keyword">for</span> j=1:size(C,2) <span class="comment">% loop over columns of M2</span>
+                    <span class="comment">% get coeffs w.r.t. uprime; D contains the polynomial terms [1,x,x^2,...]; B contains</span>
+                    <span class="comment">% the corresponding coefficients [a0,a1,a2,...]</span>
+                    [B,D] = coeffs(Num(k),uprime(j));
+                    <span class="keyword">if</span> ~isempty(B)
+                        <span class="comment">% set all components of D to zero where uprime(j) occurs. This</span>
+                        <span class="comment">% is to exclude the term that does not contain uprime(j)</span>
+                        Dz = subs(D,uprime(j),0);
+                        izx = find(Dz == 0);
+                        <span class="keyword">if</span> ~isempty(izx)
+                            <span class="comment">% assemble and sum the terms sans the term that does not</span>
+                            <span class="comment">% contain uprime(j)</span>
+                            C(k,j) = simplify(D(izx)*B(izx)'/(uprime(j)*Den(k)));
+                            <span class="comment">% we've already accounted for uprime(j) in row k so set</span>
+                            <span class="comment">% all terms that have uprime(j) to 0</span>
+                            Num(k) = subs(Num(k),uprime(j),0);
+                        <span class="keyword">end</span>
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> displayCoefficients
+                display <span class="string">Cmatrix</span>;
+                pretty(C);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> A = extractAMatrix(equations,u,displayCoefficients)
+            A = equationsToMatrix(equations,u);
+            <span class="keyword">if</span> displayCoefficients
+                display <span class="string">Amatrix</span>;
+                pretty(A);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> D = extractDMatrix(equations,u,displayCoefficients)
+            D = equationsToMatrix(equations,u);
+            <span class="keyword">if</span> displayCoefficients
+                display <span class="string">Dmatrix</span>;
+                pretty(D);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> XFunction = convertSymbolicMatrixToFunction(X,variables,filename)
+            XFunction = matlabFunction(X(:),<span class="string">'vars'</span>,variables,<span class="string">'file'</span>,filename);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Error using pdetbplus.coeffsObject (line 118)
+Not enough input arguments.
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef coeffsObject < pdetbplus.formulation
+    %coeffsObject Represent coefficients (c,f,a,d) for geometry
+    %   Use coeffsObject to specify coefficients and pass coefficients function handle
+    %   to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic.
+    %
+    %   coeffsObject methods:
+    %
+    %       add         - Add coefficient per region of geometry
+    %       getMatrices - Get area integral matrices as described in PDE Toolbox function assema
+    %       getJacobian - Get Jacobian of area integral matrices
+    %
+    %   coeffsObject properties:
+    %
+    %       fFunction   - Function handle for "f" coefficient as described in PDE Toolbox doc
+    %       cFunction   - Function handle for "c" coefficient as described in PDE Toolbox doc
+    %       aFunction   - Function handle for "a" coefficient as described in PDE Toolbox doc
+    %       dFunction   - Function handle for "d" coefficient as described in PDE Toolbox doc
+    %
+    %   Example: create coeffsObject for geometry, g1 and problem output
+    %   dimensions = 2.
+    %       coeffs = coeffsObject(g1,2);
+    %
+    %   Example: for a 3 output dimension problem, specify "f" as [0,0,1] for region 'A' in
+    %   coeffsObject, coeffs.
+    %           function fvalue = fCoeff(x,y,u,ux,uy,time)
+    %               fvalue = [0,0,1];
+    %           end
+    %           coeffs.add('region','A','fiFunction',@fCoeff);
+    %
+    %   Example: for a scalar output problem, specify "c" for PDE term: [d/dx, d/dy]*[1,
+    %   -3.1;0, 4.7]*[du/dx; du/dy] for region 'A' in coeffsObject, coeffs.
+    %           function Cvalue = cCoeff(x,y,u,ux,uy,time)
+    %               Cvalue = [1,-3.1;0,4.7];
+    %           end
+    %           coeffs.add('region','A','cijFunction',@cCoeff);
+    %
+    %   Example: for a 2 output dimension problem, specify "a" for PDE term: [1 0; -1
+    %   3.3]*[u1;u2] for region 'A' in coeffsObject, coeffs.
+    %           function avalue = aCoeff(x,y,u,ux,uy,time)
+    %               avalue = [1,0; -1,3.3];
+    %           end
+    %           coeffs.add('region','A','aijFunction',@aCoeff);
+    %
+    %   Example: for a scalar output problem, specify "f" as 2 for region 'A' in
+    %   coeffsObject, coeffs.
+    %           coeffs.add('region','A','fConstantValue',2);
+    %
+    %   Example: for a 2 output dimension problem, specify "c" for PDE term [d/dx,d/dy]*[1 0
+    %   0 0;0 1 0 0;0 0 1 0;0 0 0 1]*[du1dx;du1dy;du2dx;du2dy] for region 'A' in
+    %   coeffsObject, coeffs.
+    %           coeffs.add('region','A','cConstantValue',1);
+    %
+    %   Example: symbolically prescribe scalar Poisson's equation for region, 'A' in
+    %   coeffsObject, coeffs.
+    %           [equations,variables] = function symbolicPoisson()
+    %               syms u ddx ddy dudx dudy;
+    %               rho = 1.0;
+    %               equations = -[ddx ddy]*[rho 0;0 rho]*[dudx;dudy] + [1 2]; % the PDE
+    %               variables = u;
+    %           end
+    %           coeffs.add('region','A','symbolicEquationFunction',@symbolicPoisson);
+    %
+    %   See also geometryObject http://www.mathworks.com/help/pde/ug/multidimensional-coefficients.html http://www.mathworks.com/help/pde/pde-coefficients.html assema assempde adaptmesh parabolic hyperbolic boundaryConditionObject
+    %
+    %Copyright 2012 The MathWorks, Inc.
+    properties (Access = private)
+        coeff = cell(0);
+        triangleIndividualCoordinatesForm = false;
+        displayCoefficients = true;
+        parser = pdetbplus.parseInputArgsObject;
+    end
+    properties (Dependent = true,SetAccess = private)
+        %fFunction Function handle for "f" coefficient as described in PDE Toolbox doc
+        %   fFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic
+        %
+        %   Example: pass fFunction from coeffObject, coeffs, to PDE Toolbox function assempde
+        %       assempde(...,coeffs.fFunction,...);
+        %
+        %   See also assempde adaptmesh parabolic hyperbolic
+        fFunction;
+        %cFunction Function handle for "c" coefficient as described in PDE Toolbox doc
+        %   cFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic
+        %
+        %   Example: pass cFunction from coeffObject, coeffs, to PDE Toolbox function assempde
+        %       assempde(...,coeffs.cFunction,...);
+        %
+        %   See also assempde adaptmesh parabolic hyperbolic        
+        cFunction;
+        %aFunction Function handle for "a" coefficient as described in PDE Toolbox doc
+        %   aFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic
+        %
+        %   Example: pass aFunction from coeffObject, coeffs, to PDE Toolbox function assempde
+        %       assempde(...,coeffs.aFunction,...);
+        %
+        %   See also assempde adaptmesh parabolic hyperbolic         
+        aFunction;
+        %dFunction Function handle for "d" coefficient as described in PDE Toolbox doc
+        %   dFunction can be passed to PDE Toolbox functions assempde, adaptmesh, parabolic, hyperbolic
+        %
+        %   Example: pass dFunction from coeffObject, coeffs, to PDE Toolbox function assempde
+        %       assempde(...,coeffs.dFunction,...);
+        %
+        %   See also assempde adaptmesh parabolic hyperbolic         
+        dFunction;
+    end
+    methods
+        function self = coeffsObject(geometry, dimension)
+            %coeffsObject Create PDE coefficients object
+            %   coeffsObject(geometry, dimension) returns a coeffsObject
+            %   instance for input: geometryObject, geometry and dimension = #output Dimension of
+            %   problem.
+            %
+            %   Example: create coeffsObject for geometry, g1 and problem output
+            %   dimensions = 2.
+            %       coeffs = coeffsObject(g1,2);
+            %
+            %   See also geometryObject boundaryConditionObject.
+            self = self@pdetbplus.formulation(geometry, dimension); 
+        end
+        function add(self,varargin)
+            %add Add coefficient per region of geometry
+            %   add(PARAM1,VALUE1,PARAM2,VALUE2,...) adds coefficients for a region to
+            %   coeffsObject instance. PARAM can be:
+            %
+            %       'region' : Name of region to which coefficient applies as char.
+            %
+            %       'fiFunction' : Function handle for setting the "f" coefficient value at element centroid. The format
+            %       for fiFunction is -
+            %           function fi = fCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+            %               N = #output dimensions
+            %               % x,y are the position coordinates. u is the solution, ux and uy are the
+            %               % direction derivatives of u.
+            %               % fi is an N length vector; nth row corresponds to entry for nth
+            %               % output equation
+            %               fi = N X 1 vector; % Can be sparse.
+            %           end
+            %
+            %       'cijFunction' : Function handle for setting the "c" coefficient value at element centroid. The format
+            %       for cijFunction is -
+            %           function C = cCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+            %               % C is an 2N x 2N matrix. C is an N-by-N matrix of 2-by-2 blocks as per the PDE
+            %               % Toolbox documentation ("logical" 2N X 2N C matrix -
+            %               % http://www.mathworks.com/help/pde/ug/c.html)
+            %               C = 2N X 2N matrix; % Can be sparse
+            %           end
+            %
+            %       'aijFunction' OR 'dijFunction' : Function handle for setting the "a" or "d"
+            %       coefficient at element centroid. The format for the aijFunction/dijFunction is -
+            %           function aij = aCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+            %               % aij is an N x N matrix; (m,n) entry in aij corresponds to the
+            %               % contribution of the nth output dimension variable to mth output
+            %               % equation
+            %               aij = N X N matrix. % Can be sparse
+            %           end
+            %
+            %       'fConstantValue' : Scalar or vector value for the "f" coefficient. In the scalar
+            %       case, the same value is applied for all output dimensions. The vector value is
+            %       of size #output dimensions x 1.
+            %
+            %       'cConstantValue', 'aConstantValue', 'dConstantValue' : Scalar or vector value
+            %       for the diagonal of the "c"/"a"/"d" coefficient matrix. In the scalar case, the
+            %       value is set to be same for all diagonal terms e.g. d/dx (.) d/dx and d/dy (.)
+            %       d/dy for 'cConstantValue' for all output dimensions where (.) denotes the
+            %       coefficient. The vector value is the diagonal of the coefficient matrix and is
+            %       #output dimensions X 1 long for 'aConstantValue' and 'dConstantValue' and
+            %       2*#output dimensions X 1 long for 'cConstantValue';
+            %
+            %       'symbolicEquationFunction' : Function handle that describes equations
+            %       symbolically using the Symbolic Math Toolbox. A license of Symbolic Math Toolbox
+            %       is required. Format for is -
+            %           function [equations,variables] = fooSymbolicEquations
+            %               equations = array of symbolic equations representing PDE;
+            %               variables = variables of PDE;
+            %               % Reserved keywords: x,y,time,ddx,ddy,d[variable]dx,d[variable]dy
+            %               % Specify the Div operator as [ddx ddy]
+            %           end
+            %
+            %   Example: for a 3 output dimension problem, specify "f" as [0,0,1] for region 'A' in
+            %   coeffsObject, coeffs.
+            %           function fvalue = fCoeff(x,y,u,ux,uy,time)
+            %               fvalue = [0,0,1];
+            %           end
+            %           coeffs.add('region','A','fiFunction',@fCoeff);
+            %
+            %   Example: for a scalar output problem, specify "c" for PDE term: [d/dx, d/dy]*[1,
+            %   -3.1;0, 4.7]*[du/dx; du/dy] for region 'A' in coeffsObject, coeffs.
+            %           function Cvalue = cCoeff(x,y,u,ux,uy,time)
+            %               Cvalue = [1,-3.1;0,4.7];
+            %           end
+            %           coeffs.add('region','A','cijFunction',@cCoeff);
+            %
+            %   Example: for a 2 output dimension problem, specify "a" for PDE term: [1 0; -1
+            %   3.3]*[u1;u2] for region 'A' in coeffsObject, coeffs.
+            %           function avalue = aCoeff(x,y,u,ux,uy,time)
+            %               avalue = [1,0; -1,3.3];
+            %           end
+            %           coeffs.add('region','A','aijFunction',@aCoeff);
+            %
+            %   Example: for a scalar output problem, specify "f" as 2 for region 'A' in
+            %   coeffsObject, coeffs.
+            %           coeffs.add('region','A','fConstantValue',2);
+            %
+            %   Example: for a 2 output dimension problem, specify "c" for PDE term [d/dx,d/dy]*[1 0
+            %   0 0;0 1 0 0;0 0 1 0;0 0 0 1]*[du1dx;du1dy;du2dx;du2dy] for region 'A' in
+            %   coeffsObject, coeffs.
+            %           coeffs.add('region','A','cConstantValue',1);
+            %
+            %   Example: symbolically prescribe scalar Poisson's equation for region, 'A' in
+            %   coeffsObject, coeffs.
+            %           [equations,variables] = function symbolicPoisson()
+            %               syms u ddx ddy dudx dudy;
+            %               rho = 1.0;
+            %               equations = -[ddx ddy]*[rho 0;0 rho]*[dudx;dudy] + [1 2]; % the PDE
+            %               variables = u;
+            %           end
+            %           coeffs.add('region','A','symbolicEquationFunction',@symbolicPoisson);
+            %
+            %   See also http://www.mathworks.com/help/pde/ug/c.html http://www.mathworks.com/help/pde/ug/multidimensional-coefficients.html
+            ps = self.parser.parseInputArgs(varargin{:});
+            self.coeff{end+1}.region = ps.Results.region;
+            if ~isempty(ps.Results.fConstantValue)                
+                fConstantValue = ps.Results.fConstantValue;
+                fiConstantFunction = @(xc,yc,uc,uxc,uyc,time) self.fiConstantFunctionHelper(fConstantValue,self.dimension);
+                self.coeff{end}.fiFunction = fiConstantFunction;
+            else
+                self.coeff{end}.fiFunction = ps.Results.fiFunction;
+            end
+            if ~isempty(ps.Results.cConstantValue)
+                cConstantValue = ps.Results.cConstantValue;
+                cijConstantDiagFunction = @(xc,yc,uc,uxc,uyc,time) self.cijConstantDiagFunctionHelper(cConstantValue,self.dimension);
+                self.coeff{end}.cijFunction = cijConstantDiagFunction;
+            else
+               self.coeff{end}.cijFunction = ps.Results.cijFunction; 
+            end
+            if ~isempty(ps.Results.aConstantValue)
+                aConstantValue = ps.Results.aConstantValue;
+                aijConstantDiagFunction = @(xc,yc,uc,uxc,uyc,time) self.aijConstantDiagFunctionHelper(aConstantValue,self.dimension);
+                self.coeff{end}.aijFunction = aijConstantDiagFunction;
+            else
+               self.coeff{end}.aijFunction = ps.Results.aijFunction;
+            end
+            if ~isempty(ps.Results.dConstantValue)
+                dConstantValue = ps.Results.dConstantValue;
+                dijConstantDiagFunction = @(xc,yc,uc,uxc,uyc,time) self.aijConstantDiagFunctionHelper(dConstantValue,self.dimension);
+                self.coeff{end}.dijFunction = dijConstantDiagFunction;
+            else
+               self.coeff{end}.dijFunction = ps.Results.dijFunction;
+            end            
+            
+            self.coeff{end}.symbolicEquationFunction = ps.Results.symbolicEquationFunction; 
+            self.coeff{end}.jcFunction = [];
+            self.coeff{end}.jaFunction = [];
+            self.coeff{end}.jdFunction = [];
+            self.coeff{end}.f = cell(self.dimension,1);
+            
+            if ~isempty(self.coeff{end}.symbolicEquationFunction)
+                [equations,variables] = self.coeff{end}.symbolicEquationFunction();
+                [mfC,mfA,mfF,mfD,jfC,jfA,jfD] = self.generateMatrixFunctionsFromSymbolic('index',length(self.coeff),'equations',equations,'variables',variables,'displayCoefficients',self.displayCoefficients);
+                if isempty(self.coeff{end}.cijFunction) && ~isempty(mfC)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfC,2,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.cijFunction = tempF;
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(jfC,2,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.jcFunction = tempF;
+                end
+                if isempty(self.coeff{end}.aijFunction) && ~isempty(mfA)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfA,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.aijFunction = tempF;
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(jfA,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.jaFunction = tempF;                    
+                end                
+                if isempty(self.coeff{end}.dijFunction) && ~isempty(mfD)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfD,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.dijFunction = tempF;
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(jfD,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.jdFunction = tempF;                    
+                end
+                if isempty(self.coeff{end}.fiFunction) && ~isempty(mfF)
+                    tempF = @(x,y,u,ux,uy,time) self.coeffFromSymbolicEquation(mfF,1,self.dimension,x,y,u,ux,uy,time);
+                    self.coeff{end}.fiFunction = tempF;                  
+                end
+            end
+        end
+        function ff = get.fFunction(self)
+            ff = @self.fFunction_impl;
+        end
+        function cf = get.cFunction(self)
+            cf = @self.cFunction_impl;
+        end   
+        function df = get.dFunction(self)
+            df = @self.dFunction_impl;
+        end   
+        function af = get.aFunction(self)
+            af = @self.aFunction_impl;
+        end       
+        function [cMatrix,aMatrix,dMatrix,F] = getMatrices(self,varargin)
+            %getMatrices Get area integral matrices as described in PDE Toolbox function assema
+            %   [cMatrix,aMatrix,dMatrix,F] = getMatrices(PARAM1,VALUE1,PARAM2,VALUE2,...) where PARAM can be:
+            %       'u'   : Output variable of PDE as an array (#Dimensions X #Nodes) long.
+            %       'time': Value of time as double.
+            %       'p','e','t': Values of externally specified mesh of structure as described in initmesh.
+            %
+            %   Example: Get cMatrix,aMatrix,F matrices corresponding to u = u0 for coeffsObject, coeffs.
+            %       [cMatrix,aMatrix,F] = coeffs.getMatrices('u',u0);
+            %
+            %   See also assema initmesh meshObject.
+            ps = self.parser.parseInputArgs(varargin{:});    
+            u = ps.Results.u;
+            time = ps.Results.time;
+            p = ps.Results.p;
+            t = ps.Results.t;
+            if isempty(p)
+                p = self.geometry.mesh.p;
+            end
+            if isempty(t)
+                t = self.geometry.mesh.t;
+            end
+            dMatrix = [];
+            if isempty(u) && isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction);
+                if ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[]);
+                end
+            elseif isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction,u);
+                if ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[],u);
+                end
+            elseif isempty(u)
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction,time);
+                if ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[],time);
+                end
+            else
+                [cMatrix,aMatrix,F] = assema(p,t,self.cFunction,self.aFunction,self.fFunction,u,time);
+                if ~isempty(self.dFunction)
+                    [~,dMatrix] = assema(p,t,[],self.dFunction,[],u,time);
+                end
+            end
+        end
+        function [cMatrix,aMatrix,dMatrix,F] = getJacobian(self,varargin)
+           %getJacobian Get Jacobian of area integral matrices
+            %   [K,M,F] = getJacobian(PARAM1,VALUE1,PARAM2,VALUE2,...) where PARAM can be:
+            %       'u'   : Output variable of PDE as an array (#Dimensions X #Nodes) long.
+            %       'time': Value of time as double.
+            %       'p','e','t': Values of externally specified mesh of structure as described in initmesh.
+            %   getJacobian is applicable only for the case when the 'symbolicEquationFunction'
+            %   input is used and is useful only when both the PDE is nonlinear and a custom
+            %   nonlinear solver is used.
+            %        
+            ps = self.parser.parseInputArgs(varargin{:});
+            u = ps.Results.u;
+            time = ps.Results.time;
+            p = ps.Results.p;
+            t = ps.Results.t;
+            if isempty(p)
+                p = self.geometry.mesh.p;
+            end
+            if isempty(t)
+                t = self.geometry.mesh.t;
+            end
+            dMatrix = [];
+            if isempty(u) && isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction);
+            elseif isempty(time)
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction,u);
+            elseif isempty(u)
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction,time);
+            else
+                [cMatrix,aMatrix,F] = assema(p,t,@self.jcFunction,@self.jaFunction,@self.fFunction,u,time);
+            end
+        end
+    end
+    methods(Hidden = true)
+        function [c] = jcFunction(self,p,t,u,time)
+            c = self.cGeneralFunction_impl(p,t,u,time,false);
+        end
+        function [a] = jaFunction(self,p,t,u,time)
+            a = self.aGeneralFunction_impl(p,t,u,time,false);
+        end          
+    end
+    methods(Access = private, Hidden = true)
+        function [f] = fFunction_impl(self,p,t,u,time)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            f = zeros(N,nt);
+            % Triangle point indices
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            % Find centroids of triangles
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            if ~isempty(u)
+                uintrp = pdeintrp(p,t,u); % Interpolated values at centroids
+                uintrp = reshape(uintrp,[],N); % matrix with N column
+                uintrp = uintrp'; % change to row vectors
+                [ux,uy] = pdegrad(p,t,u); % Approximate derivatives
+            else
+                uintrp = [];
+                ux = [];
+                uy = [];
+            end
+            for cix=1:length(self.coeff)
+                fiFunction = self.coeff{cix}.fiFunction;
+                if ~isempty(fiFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    if ix
+                        xc = xpts(ix);
+                        yc = ypts(ix);
+                        if ~isempty(u)
+                            uc = uintrp(:,ix);
+                            uxc = ux(:,ix);
+                            uyc = uy(:,ix);
+                        end
+                        for k=1:length(xc)
+                            if ~isempty(u)
+                                if ~self.triangleIndividualCoordinatesForm
+                                    fi = fiFunction(xc(k),yc(k),uc(:,k),uxc(:,k),uyc(:,k),time);
+                                else
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    fi = fiFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],uc(:,k),uxc(:,k),uyc(:,k),time);
+                                end
+                            else
+                                if ~self.triangleIndividualCoordinatesForm
+                                    fi = fiFunction(xc(k),yc(k),[],[],[],time);
+                                else
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    fi = fiFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],[],[],[],time);
+                                end
+                            end
+                            for n=1:N
+                                f(n,ix(k)) = fi(n);
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        function [c] = cFunction_impl(self,p,t,u,time)
+            c = self.cGeneralFunction_impl(p,t,u,time,true);
+        end
+        function [d] = dFunction_impl(self,p,t,u,time)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            d = zeros(N*N,nt);
+            % Triangle point indices
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            % Find centroids of triangles
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            if ~isempty(u)
+                uintrp = pdeintrp(p,t,u); % Interpolated values at centroids
+                uintrp = reshape(uintrp,[],N); % matrix with N column
+                uintrp = uintrp'; % change to row vectors
+                [ux,uy] = pdegrad(p,t,u); % Approximate derivatives
+            else
+                uintrp = [];
+                ux = [];
+                uy = [];
+            end
+            for cix=1:length(self.coeff)
+                dijFunction = self.coeff{cix}.dijFunction;
+                if ~isempty(dijFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    if ix
+                        xc = xpts(ix);
+                        yc = ypts(ix);
+                        if ~isempty(u)
+                            uc = uintrp(:,ix);
+                            uxc = ux(:,ix);
+                            uyc = uy(:,ix);
+                        end
+                        for k=1:length(xc)
+                            if ~isempty(u)
+                                if ~self.triangleIndividualCoordinatesForm
+                                    dij = dijFunction(xc(k),yc(k),uc(:,k),uxc(:,k),uyc(:,k),time);
+                                else
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    dij = dijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],uc(:,k),uxc(:,k),uyc(:,k),time);
+                                end
+                            else
+                                if ~self.triangleIndividualCoordinatesForm
+                                    dij = dijFunction(xc(k),yc(k),[],[],[],time);
+                                else
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    dij = dijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],[],[],[],time);
+                                end
+                            end
+                            d(:,ix(k)) = dij(:);
+                        end
+                    end
+                end
+            end
+        end
+        function [c] = cGeneralFunction_impl(self,p,t,u,time,iscFunction)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            c = zeros(4*N^2,nt);
+            % Triangle point indices
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            % Find centroids of triangles
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            if ~isempty(u)
+                uintrp = pdeintrp(p,t,u); % Interpolated values at centroids
+                uintrp = reshape(uintrp,[],N); % matrix with N column
+                uintrp = uintrp'; % change to row vectors
+                [ux,uy] = pdegrad(p,t,u); % Approximate derivatives
+            else
+                uintrp = [];
+                ux = [];
+                uy = [];
+            end            
+            for cix=1:length(self.coeff)
+                cijFunction = self.coeff{cix}.cijFunction;
+                if ~iscFunction
+                    cijFunction = self.coeff{cix}.jcFunction;
+                end
+                if ~isempty(cijFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    if ix
+                        for k=ix
+                            if ~isempty(u)
+                                cij = cijFunction(xpts(k),ypts(k),uintrp(:,k),ux(:,k),uy(:,k),time);
+                            else
+                                cij = cijFunction(xpts(k),ypts(k),[],[],[],time);
+                            end
+                            count = 1;
+                            for n=1:N
+                                for m=1:N
+                                    c(count,k) = cij(2*(m-1)+1, 2*(n-1)+1);
+                                    count = count + 1;
+                                    c(count,k) = cij(2*(m-1)+2, 2*(n-1)+1);
+                                    count = count + 1;
+                                    c(count,k) = cij(2*(m-1)+1, 2*(n-1)+2);
+                                    count = count + 1;
+                                    c(count,k) = cij(2*(m-1)+2, 2*(n-1)+2);
+                                    count = count+1;
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        function [a] = aFunction_impl(self,p,t,u,time)
+            a = self.aGeneralFunction_impl(p,t,u,time,true);
+        end
+        function [a] = aGeneralFunction_impl(self,p,t,u,time,isaFunction)
+            regionToIds = self.geometry.regionToId;
+            N = self.dimension;
+            nt = size(t,2);
+            a = zeros(N*N,nt);
+            % Triangle point indices
+            it1=t(self.geometry.mesh.triangleFirstPointIndex,:);
+            it2=t(self.geometry.mesh.triangleSecondPointIndex,:);
+            it3=t(self.geometry.mesh.triangleThirdPointIndex,:);
+            % Find centroids of triangles
+            xpts=(p(1,it1)+p(1,it2)+p(1,it3))/3;
+            ypts=(p(2,it1)+p(2,it2)+p(2,it3))/3;
+            if ~isempty(u)
+                uintrp = pdeintrp(p,t,u); % Interpolated values at centroids
+                uintrp = reshape(uintrp,[],N); % matrix with N column
+                uintrp = uintrp'; % change to row vectors
+                [ux,uy] = pdegrad(p,t,u); % Approximate derivatives
+            else
+                uintrp = [];
+                ux = [];
+                uy = [];
+            end
+            for cix=1:length(self.coeff)
+                aijFunction = self.coeff{cix}.aijFunction;
+                if ~isaFunction
+                    aijFunction = self.coeff{cix}.jaFunction;
+                end
+                if ~isempty(aijFunction)
+                    regionId = regionToIds(self.coeff{cix}.region);
+                    ix = find(t(self.geometry.mesh.triangleRegionIndex,:) == regionId);
+                    if ix
+                        xc = xpts(ix);
+                        yc = ypts(ix);
+                        if ~isempty(u)
+                            uc = uintrp(:,ix);
+                            uxc = ux(:,ix);
+                            uyc = uy(:,ix);
+                        end
+                        for k=1:length(xc)
+                            if ~isempty(u)
+                                if ~self.triangleIndividualCoordinatesForm
+                                    aij = aijFunction(xc(k),yc(k),uc(:,k),uxc(:,k),uyc(:,k),time);
+                                else
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    aij = aijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],uc(:,k),uxc(:,k),uyc(:,k),time);
+                                end
+                            else
+                                if ~self.triangleIndividualCoordinatesForm
+                                    aij = aijFunction(xc(k),yc(k),[],[],[],time);
+                                else
+                                    p1 = p(:,t(self.geometry.mesh.triangleFirstPointIndex,ix(k)));
+                                    p2 = p(:,t(self.geometry.mesh.triangleSecondPointIndex,ix(k)));
+                                    p3 = p(:,t(self.geometry.mesh.triangleThirdPointIndex,ix(k)));
+                                    aij = aijFunction([p1(1) p2(1) p3(1)],[p1(2) p2(2) p3(2)],[],[],[],time);
+                                end
+                            end
+                            a(:,ix(k)) = aij(:);
+                        end
+                    end
+                end
+            end
+        end
+    end
+    methods(Static, Hidden = true)        
+        function [cij] = cijConstantDiagFunctionHelper(cVal,N)
+            cij = sparse(2*N,2*N);
+            if ~isscalar(cVal)
+                for n=1:size(cij,1)
+                    cij(n,n) = cVal(n);
+                end
+            else
+                for n=1:size(cij,1)
+                    cij(n,n) = cVal;
+                end
+            end
+        end
+        function fi = fiConstantFunctionHelper(fVal,N)
+            if isscalar(fVal)
+                fi = fVal*ones(N,1);
+            else
+                fi = fVal;
+            end
+        end
+        function [aij] = aijConstantDiagFunctionHelper(aVal,N)
+            aij = sparse(N,N);
+            if ~isscalar(aVal)
+                for n=1:size(aij,1)
+                    aij(n,n) = aVal(n);
+                end
+            else
+                for n=1:size(aij,1)
+                    aij(n,n) = aVal;
+                end
+            end
+        end
+    end
+    methods(Static,Access = private)
+        function fi = zeroFFunction(N)
+            fi = zeros(N,1);
+        end
+        function cij = coeffFromSymbolicEquation(mfC,intFactor,N,x,y,u,ux,uy,time)
+            if isempty(time)
+                time = 0;
+            end
+            uxy = zeros(2*N,1);
+            if isempty(u)
+                u = zeros(N,1);
+            else
+                uxy(1:2:end-1,1) = ux;
+                uxy(2:2:end,1) = uy;
+            end
+            ucell = num2cell(u);
+            uxycell = num2cell(uxy);
+            cij = mfC(x,y,time,ucell{:},uxycell{:});
+%             switch length(u)
+%                 case 1                     
+%                     if isempty(u)
+%                         cij = mfC(x,y,time,0,0,0);
+%                     else
+%                         cij = mfC(x,y,time,u(1),ux(1),uy(1));
+%                     end
+%                 case 2
+%                     if isempty(u)
+%                         cij = mfC(x,y,time,0,0,0,0,0,0);
+%                     else
+%                         cij = mfC(x,y,time,u(1),u(2),ux(1),uy(1),ux(2),uy(2));
+%                     end
+%                 case 3                    
+%                     if isempty(u)
+%                         cij = mfC(x,y,time,0,0,0,0,0,0,0,0,0);
+%                     else
+%                         cij = mfC(x,y,time,u(1),u(2),u(3),ux(1),uy(1),ux(2),uy(2),ux(3),uy(3));
+%                     end
+%                 case 4                    
+%                     if isempty(u)
+%                         cij = mfC(x,y,time,0,0,0,0,0,0,0,0,0,0,0,0);
+%                     else
+%                         cij = mfC(x,y,time,u(1),u(2),u(3),u(4),ux(1),uy(1),ux(2),uy(2),ux(3),uy(3),ux(4),uy(4));
+%                     end                    
+%                 case 5                    
+%                     if isempty(u)
+%                         cij = mfC(x,y,time,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+%                     else
+%                         cij = mfC(x,y,time,u(1),u(2),u(3),u(4),u(5),ux(1),uy(1),ux(2),uy(2),ux(3),uy(3),ux(4),uy(4),ux(5),uy(5));
+%                     end
+%             end
+            cij = reshape(cij,intFactor*N,[]);
+        end
+        function [mfC,mfA,mfF,mfD,jfC,jfA,jfD] = generateMatrixFunctionsFromSymbolic(varargin)
+            equations = [];
+            variables = [];
+            index = 1;
+            displayCoefficients = true;
+            for k=1:2:length(varargin)
+                a = varargin(k);
+                b = varargin(k+1);
+                if strcmp(a,'equations')
+                    equations = b{1};
+                elseif strcmp(a,'variables')
+                    variables = b{1};
+                elseif strcmp(a,'index')
+                    index = b{1};                     
+                elseif strcmp(a,'displayCoefficients')
+                    displayCoefficients = b{1}; 
+                end
+            end
+            uprime = sym(zeros(1,length(variables)*2));
+            ddt = sym(zeros(1,length(variables)));
+            d2d2t = sym(zeros(1,length(variables)));
+            for k=1:length(variables)
+                uprime(2*k-1) = sym(strcat('d',char(variables(k)),'dx'));
+                uprime(2*k) = sym(strcat('d',char(variables(k)),'dy'));
+                ddt(k) = sym(strcat('d',char(variables(k)),'dt'));
+                d2d2t(k) = sym(strcat('d2',char(variables(k)),'d2t'));
+            end
+            variablesPlus = [sym('x') sym('y') sym('time') variables uprime];
+            % extract ddt* and d2dt* terms
+            nond2d2tequations = subs(equations,d2d2t,0*d2d2t);
+            Dequations = equations - nond2d2tequations;
+            equations = nond2d2tequations;
+            if ~isempty(find(Dequations ~= 0,1))
+                D = pdetbplus.coeffsObject.extractDMatrix(Dequations,d2d2t,displayCoefficients);
+                filename = strcat('Dfunction',num2str(index));
+                mfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(D,variablesPlus,filename);
+                jD = jacobian(D*d2d2t.',d2d2t);
+                filename = strcat('jDfunction',num2str(index));
+                jfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jD,variablesPlus,filename);
+            else
+                nonddtequations = subs(equations,ddt,0*ddt);
+                Dequations = equations - nonddtequations;
+                equations = nonddtequations;                
+                if ~isempty(find(Dequations ~= 0,1))
+                    D = pdetbplus.coeffsObject.extractDMatrix(Dequations,ddt,displayCoefficients);
+                    filename = strcat('Dfunction',num2str(index));
+                    mfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(D,variablesPlus,filename);
+                    jD = jacobian(D*ddt.',ddt);
+                    filename = strcat('jDfunction',num2str(index));
+                    jfD = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jD,variablesPlus,filename);
+                else                    
+                    mfD = [];
+                    jfD = [];
+                end
+            end
+            % extract ddx*, ddy* terms, C matrix
+            nonCequations = subs(equations,[sym('ddx'),sym('ddy')],[0,0]);
+            Cequations = -(equations - nonCequations); % "-" because the Div template expects this form
+            C = pdetbplus.coeffsObject.extractCMatrix(Cequations,uprime,displayCoefficients);            
+            filename = strcat('Cfunction',num2str(index));
+            mfC = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(C,variablesPlus,filename);
+            jC = jacobian(C*uprime.',uprime);
+            filename = strcat('jCfunction',num2str(index));
+            jfC = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jC,variablesPlus,filename);
+            % extract F vector
+            Fequations = -subs(nonCequations,variables,0*variables); % "-" because "f" needs to be on the RHS            
+            if displayCoefficients
+                display Fvector; pretty(sym(Fequations));
+            end
+            if ~isempty(find(Fequations ~= 0,1))
+                filename = strcat('Ffunction',num2str(index));
+                mfF = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(Fequations,variablesPlus,filename);
+            else
+                mfF = [];
+            end
+            % extract A matrix
+            Aequations = (nonCequations - Fequations);            
+            if ~isempty(find(Aequations ~= 0,1))
+                A = pdetbplus.coeffsObject.extractAMatrix(Aequations,variables,displayCoefficients);
+                filename = strcat('Afunction',num2str(index));
+                mfA = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(A,variablesPlus,filename);
+                jA = jacobian(A*variables.',variables);
+                filename = strcat('jAfunction',num2str(index));
+                jfA = pdetbplus.coeffsObject.convertSymbolicMatrixToFunction(jA,variablesPlus,filename);
+            else
+                mfA = [];
+                jfA = [];
+            end
+        end     
+        function C = extractCMatrix(equations,uprime,displayCoefficients)
+            M = equationsToMatrix(equations,[sym('ddx') sym('ddy')]);
+            % M is a N x 2 matrix; we convert this to a 2N vector
+            Mt = M.';
+            Mvec = Mt(:);
+            [Num,Den] = numden(Mvec);
+            C = sym(zeros(length(Num),length(Num)));            
+            for k=1:size(C,1) % loop over rows of M2
+                for j=1:size(C,2) % loop over columns of M2
+                    % get coeffs w.r.t. uprime; D contains the polynomial terms [1,x,x^2,...]; B contains
+                    % the corresponding coefficients [a0,a1,a2,...]
+                    [B,D] = coeffs(Num(k),uprime(j));
+                    if ~isempty(B)
+                        % set all components of D to zero where uprime(j) occurs. This
+                        % is to exclude the term that does not contain uprime(j)
+                        Dz = subs(D,uprime(j),0);
+                        izx = find(Dz == 0);
+                        if ~isempty(izx)
+                            % assemble and sum the terms sans the term that does not
+                            % contain uprime(j)
+                            C(k,j) = simplify(D(izx)*B(izx)'/(uprime(j)*Den(k)));
+                            % we've already accounted for uprime(j) in row k so set
+                            % all terms that have uprime(j) to 0
+                            Num(k) = subs(Num(k),uprime(j),0);
+                        end
+                    end
+                end
+            end
+            if displayCoefficients
+                display Cmatrix;
+                pretty(C);
+            end
+        end     
+        function A = extractAMatrix(equations,u,displayCoefficients)
+            A = equationsToMatrix(equations,u);
+            if displayCoefficients
+                display Amatrix;
+                pretty(A);
+            end
+        end
+        function D = extractDMatrix(equations,u,displayCoefficients)
+            D = equationsToMatrix(equations,u);
+            if displayCoefficients
+                display Dmatrix;
+                pretty(D);
+            end
+        end
+        function XFunction = convertSymbolicMatrixToFunction(X,variables,filename)
+            XFunction = matlabFunction(X(:),'vars',variables,'file',filename);
+        end
+    end
+end
+##### SOURCE END #####
+--></body></html>

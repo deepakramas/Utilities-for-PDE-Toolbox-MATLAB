@@ -1,0 +1,390 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>exampleGeometries</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-12"><meta name="DC.source" content="exampleGeometries.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Creation of geometries for the PDE Toolbox using the geometryObject class</a></li><li><a href="#3">Initial setting for mesh display</a></li><li><a href="#4">Example 1: How to create a circle</a></li><li><a href="#5">Create square  with inner region = regionA and exterior region = regionB</a></li><li><a href="#6">Create arbitrary region out of arcs and lines</a></li><li><a href="#7">Create polygon  with left region = regionA and right region = regionB with left region being declared as the exterior region</a></li><li><a href="#8">Combine previous regions</a></li><li><a href="#9">Add a scaled, translated, rotated copy of the composite geometry</a></li><li><a href="#10">Query for region (sub-domain) Ids; useful for specifying boundary conditions, formulation</a></li><li><a href="#11">Get handle to geometry function that can be passed to adaptmesh()</a></li><li><a href="#12">Pass mesh to assempde()</a></li><li><a href="#13">Create geometry from parametric segments (requires Symbolic Math Toolbox)</a></li><li><a href="#14">Create geometry from image (requires Image Processing Toolbox)</a></li></ul></div><h2>Creation of geometries for the PDE Toolbox using the geometryObject class<a name="1"></a></h2><p>The geometry can be passed as a geometry function for adaptmesh() (PDE Toolbox) or as mesh data for assempde() (PDE Toolbox). The geometry can also be passed as an argument for the coeffsObject and boundaryConditionObject classes. See <i>exampleFormulation.m</i> on how to specify formulation. If instead you would like to directly create BC and coefficient functions, region Ids can be conveniently extracted for the purposes of specifying Boundary conditions and coefficients</p><pre class="codeinput"><span class="keyword">function</span> [] = exampleGeometries()
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import package for accessing the geometryObject and boundary classes</span>
+</pre><h2>Initial setting for mesh display<a name="3"></a></h2><pre class="codeinput">showMesh = true; <span class="comment">% show mesh in plots</span>
+</pre><h2>Example 1: How to create a circle<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Define center : (1,1) as a pointObject type</span>
+center = pointObject(1,1);
+<span class="comment">% Define radius of 0.25</span>
+radius = 0.25;
+<span class="comment">% Specify region inside circle as 'regionA'</span>
+innerRegion = <span class="string">'regionA'</span>;
+<span class="comment">% Specify region outside circle as 'regionB'</span>
+exteriorRegion = <span class="string">'regionB'</span>;
+<span class="comment">% Create Circle called 'circle1'</span>
+tmp = geometryObject.createCircle(<span class="string">'name'</span>,<span class="string">'circle1'</span>,<span class="string">'center'</span>,center,<span class="string">'radius'</span>,radius,<span class="string">'innerRegion'</span>,innerRegion,<span class="keyword">...</span>
+    <span class="string">'outerRegion'</span>,exteriorRegion);
+<span class="comment">% Make a copy of circle for later use</span>
+g{1} = tmp;
+<span class="comment">% Mesh the circle with Hmax = 2*pi*radius/20 and plot the meshed geometry</span>
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,true,<span class="string">'Hmax'</span>,2*pi*radius/20);
+</pre><img vspace="5" hspace="5" src="exampleGeometries_01.png" alt=""> <h2>Create square  with inner region = regionA and exterior region = regionB<a name="5"></a></h2><pre class="codeinput">moveClockwise = true;
+pt1 = pointObject(0.25,0.5);
+pt2 = pointObject(0.5,0.65);
+g{2} = geometryObject.createSquare(<span class="string">'name'</span>,<span class="string">'square2'</span>,<span class="string">'edgeStartPoint'</span>,pt1,<span class="keyword">...</span>
+    <span class="string">'edgeEndPoint'</span>,pt2,<span class="string">'innerRegion'</span>,innerRegion,<span class="string">'outerRegion'</span>,exteriorRegion,<span class="string">'clockwise'</span>,moveClockwise);
+tmp = g{2};
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+</pre><img vspace="5" hspace="5" src="exampleGeometries_02.png" alt=""> <h2>Create arbitrary region out of arcs and lines<a name="6"></a></h2><p>define the points moving clockwise</p><pre class="codeinput">center = pointObject(0.76,-0.5);
+pt1 = pointObject(0.75,0.5);
+pt2 = pointObject(0.85,0.5);
+la{1} = arcObject(<span class="string">'l1'</span>,<span class="string">'center'</span>,center,<span class="string">'startPoint'</span>,pt1,<span class="string">'endPoint'</span>,pt2);
+center = pointObject(0,0);
+startPoint = la{1}.endPoint();
+rotationAngle = -pi/8; <span class="comment">% negative for clockwise</span>
+la{2} = arcObject(<span class="string">'l2'</span>,<span class="string">'center'</span>,center,<span class="string">'startPoint'</span>,startPoint,<span class="string">'rotationAngle'</span>,rotationAngle);
+<span class="comment">% join end and starting points</span>
+la{3} = lineObject(<span class="string">'l3'</span>,la{2}.endPoint(),la{1}.startPoint());
+<span class="comment">% set the regions. inner region is regionA, exterior region is regionB</span>
+<span class="keyword">for</span> k=1:3
+    la{k}.leftRegion = <span class="string">'regionB'</span>;
+    la{k}.rightRegion = <span class="string">'regionA'</span>;
+<span class="keyword">end</span>
+g{3} = geometryObject(<span class="string">'arclineShape'</span>,la);
+<span class="comment">% need to manually specify exterior region</span>
+<span class="comment">% this is the exterior region if this region is meshed by itself</span>
+g{3}.exteriorRegion = <span class="string">'regionB'</span>;
+<span class="comment">% rotate a bit around (0,0); make sure boundaries of regions do not</span>
+<span class="comment">% intersect!</span>
+g{3} = g{3}.rotate(pointObject(0,0),-pi/50);
+tmp = g{3};
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+<span class="comment">% Note: you can create your own boundary type by implementing the</span>
+<span class="comment">% boundaryConditionObject interface</span>
+</pre><img vspace="5" hspace="5" src="exampleGeometries_03.png" alt=""> <h2>Create polygon  with left region = regionA and right region = regionB with left region being declared as the exterior region<a name="7"></a></h2><pre class="codeinput">pts{1} = pointObject(0,0);
+pts{2} = pts{1} + [0,1];
+pts{3} = pts{2} + [1,1];
+pts{4} = pts{3} + [1,-1];
+pts{5} = pts{4} - [0,1];
+leftRegion = <span class="string">'regionA'</span>;
+rightRegion = <span class="string">'regionB'</span>;
+isClockwise = true;
+g{4} = geometryObject.createPolygon(<span class="string">'name'</span>,<span class="string">'poly3'</span>,<span class="string">'points'</span>,pts,<span class="string">'leftRegion'</span>,leftRegion,<span class="string">'rightRegion'</span>,rightRegion,<span class="keyword">...</span>
+    <span class="string">'clockwise'</span>,isClockwise);
+tmp = g{4};
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+</pre><img vspace="5" hspace="5" src="exampleGeometries_04.png" alt=""> <h2>Combine previous regions<a name="8"></a></h2><p>Note: g{1}..g{4} should not have intersecting boundaries or the same boundary present in more than one region (geometryObject)</p><pre class="codeinput">g{5} = g{1} + g{2} + g{3} + g{4};
+<span class="comment">% set exterior region to be the same as that for the polygon i.e. regionA</span>
+<span class="comment">% Before calling initMesh(), a single exteriorRegion must have been defined</span>
+g{5}.exteriorRegion = g{4}.exteriorRegion;
+tmp = g{5};
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+<span class="comment">% By careful specification of regions we can mesh where we like</span>
+</pre><img vspace="5" hspace="5" src="exampleGeometries_05.png" alt=""> <h2>Add a scaled, translated, rotated copy of the composite geometry<a name="9"></a></h2><pre class="codeinput">g{6} = g{5}.scale(0.5).translate(pointObject(2.5,0)).rotate(pointObject(2.6,0),<span class="keyword">...</span>
+    pi/4);
+g{7} = g{5} + g{6};
+g{7}.exteriorRegion = g{6}.exteriorRegion();
+figure;
+tmp = g{7}.initMesh(<span class="string">'showMesh'</span>,showMesh);
+</pre><img vspace="5" hspace="5" src="exampleGeometries_06.png" alt=""> <h2>Query for region (sub-domain) Ids; useful for specifying boundary conditions, formulation<a name="10"></a></h2><pre class="codeinput">display <span class="string">'regionB id'</span>
+tmp.getRegionToId(<span class="string">'regionB'</span>)
+display <span class="string">'region A id'</span>
+tmp.getRegionToId(<span class="string">'regionA'</span>)
+</pre><pre class="codeoutput">regionB id
+
+ans =
+
+     1
+
+region A id
+
+ans =
+
+     0
+
+</pre><h2>Get handle to geometry function that can be passed to adaptmesh()<a name="11"></a></h2><pre class="codeinput">display <span class="string">'handle to geometry function'</span>
+geometryFunction = @tmp.geometryFunction
+<span class="comment">% e.g. adaptmesh(geometryFunction,...)</span>
+</pre><pre class="codeoutput">handle to geometry function
+
+geometryFunction = 
+
+    @(varargin)tmp.geometryFunction(varargin{:})
+
+</pre><h2>Pass mesh to assempde()<a name="12"></a></h2><p>e.g. assempde(...,tmp.mesh.p,tmp.mesh.e,tmp.mesh.t,...)</p><h2>Create geometry from parametric segments (requires Symbolic Math Toolbox)<a name="13"></a></h2><p>define parametric segments for the geometry and create PDE geometry</p><pre class="codeinput">syms <span class="string">r</span>;
+xSym = 2*cos(r);
+ySym = 3*sin(r);
+<span class="comment">% segment 1 with parametric curve(2*cos(r),3*sin(r))</span>
+le{1} = parametricLineObject(<span class="string">'pl4'</span>,xSym,ySym,0,pi);
+le{1}.leftRegion = <span class="string">'regionA'</span>;
+le{1}.rightRegion = <span class="string">'regionB'</span>;
+ySym = ySym + sin(7*r);
+<span class="comment">% segment 2 with modified expression for y</span>
+<span class="comment">% We need to make sure that the second segment starts where the first segment ends</span>
+le{2} = parametricLineObject(<span class="string">'pl5'</span>,xSym,ySym,pi,3/2*pi);
+le{2}.leftRegion = <span class="string">'regionA'</span>;
+le{2}.rightRegion = <span class="string">'regionB'</span>;
+<span class="comment">% segment 3 - straight line connects the start and end points of the</span>
+<span class="comment">% previous segments</span>
+le{3} = lineObject(<span class="string">'pl6'</span>,le{2}.endPoint(),le{1}.startPoint());
+le{3}.leftRegion = <span class="string">'regionA'</span>;
+le{3}.rightRegion = <span class="string">'regionB'</span>;
+g{8} = geometryObject(<span class="string">'paramBased'</span>,le);
+g{8}.exteriorRegion = <span class="string">'regionB'</span>;
+tmp = g{8};
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+</pre><img vspace="5" hspace="5" src="exampleGeometries_07.png" alt=""> <h2>Create geometry from image (requires Image Processing Toolbox)<a name="14"></a></h2><p>read image, identify relevant boundaries and create PDE geometry</p><pre class="codeinput">im = imread(<span class="string">'testImage.png'</span>);
+figure;
+image(im);
+<span class="comment">% create geometries from recognized boundaries of image</span>
+[imgs,isClockwise] = geometryObject.createGeometriesFromImage(<span class="string">'image'</span>,<span class="string">'testImage.png'</span>,<span class="string">'minimumPoints'</span>,15);
+<span class="comment">% 1. not all geometries created this way are interesting or what we expect.</span>
+<span class="comment">% We need manually verify by plotting the geometries individually.</span>
+<span class="comment">% Here we combine the ones with indices 3,4,..end that apriori have</span>
+<span class="comment">% been determined to be the ones we are interested in (by calling</span>
+<span class="comment">% the plot() method per geometry)</span>
+<span class="comment">% 2. Set interior and exterior regions</span>
+<span class="comment">% for geometry 3, we want regionC to be exterior and regionB to be interior</span>
+tmp = imgs{3}.setInteriorExteriorRegions(<span class="string">'regionB'</span>,<span class="string">'regionC'</span>,isClockwise);
+<span class="keyword">for</span> k=4:length(imgs)
+    imgs{k} = imgs{k}.setInteriorExteriorRegions(<span class="string">'regionA'</span>,<span class="string">'regionB'</span>,isClockwise);
+    tmp = tmp + imgs{k};
+<span class="keyword">end</span>
+<span class="comment">% set exterior region for combined geometry</span>
+tmp.exteriorRegion = <span class="string">'regionC'</span>;
+<span class="comment">% get limits of geometry to transform the coordinates</span>
+[xmin,ymin,xmax,ymax] = tmp.getLimitsXY();
+<span class="comment">% get rid of XY offsets and scale model to be of size ~ 1</span>
+tmp = tmp.translate(pointObject(0-xmin,0-ymin)).scale(1/max(abs(xmax-xmin),abs(ymax-ymin)));
+figure;
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+</pre><img vspace="5" hspace="5" src="exampleGeometries_08.png" alt=""> <img vspace="5" hspace="5" src="exampleGeometries_09.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Creation of geometries for the PDE Toolbox using the geometryObject class 
+% The geometry can be passed as a geometry function for adaptmesh() (PDE Toolbox) or as mesh data for assempde() (PDE Toolbox). 
+% The geometry can also be passed as an argument for the coeffsObject and
+% boundaryConditionObject classes. See _exampleFormulation.m_ on how to specify formulation.
+% If instead you would like to directly create BC and coefficient functions,
+% region Ids can be conveniently extracted for the purposes of specifying
+% Boundary conditions and coefficients
+%  
+function [] = exampleGeometries()
+import pdetbplus.*; % import package for accessing the geometryObject and boundary classes
+%% Initial setting for mesh display
+showMesh = true; % show mesh in plots
+%% Example 1: How to create a circle
+
+% Define center : (1,1) as a pointObject type
+center = pointObject(1,1);
+% Define radius of 0.25
+radius = 0.25;
+% Specify region inside circle as 'regionA'
+innerRegion = 'regionA';
+% Specify region outside circle as 'regionB'
+exteriorRegion = 'regionB';
+% Create Circle called 'circle1'
+tmp = geometryObject.createCircle('name','circle1','center',center,'radius',radius,'innerRegion',innerRegion,...
+    'outerRegion',exteriorRegion);
+% Make a copy of circle for later use
+g{1} = tmp;
+% Mesh the circle with Hmax = 2*pi*radius/20 and plot the meshed geometry
+figure;
+tmp.initMesh('showMesh',true,'Hmax',2*pi*radius/20);
+%% Create square  with inner region = regionA and exterior region = regionB
+moveClockwise = true;
+pt1 = pointObject(0.25,0.5);
+pt2 = pointObject(0.5,0.65);
+g{2} = geometryObject.createSquare('name','square2','edgeStartPoint',pt1,...
+    'edgeEndPoint',pt2,'innerRegion',innerRegion,'outerRegion',exteriorRegion,'clockwise',moveClockwise);
+tmp = g{2};
+figure;
+tmp.initMesh('showMesh',showMesh);
+%% Create arbitrary region out of arcs and lines
+% define the points moving clockwise
+center = pointObject(0.76,-0.5);
+pt1 = pointObject(0.75,0.5);
+pt2 = pointObject(0.85,0.5);
+la{1} = arcObject('l1','center',center,'startPoint',pt1,'endPoint',pt2);
+center = pointObject(0,0);
+startPoint = la{1}.endPoint();
+rotationAngle = -pi/8; % negative for clockwise
+la{2} = arcObject('l2','center',center,'startPoint',startPoint,'rotationAngle',rotationAngle);
+% join end and starting points
+la{3} = lineObject('l3',la{2}.endPoint(),la{1}.startPoint());
+% set the regions. inner region is regionA, exterior region is regionB
+for k=1:3
+    la{k}.leftRegion = 'regionB';
+    la{k}.rightRegion = 'regionA';
+end
+g{3} = geometryObject('arclineShape',la);
+% need to manually specify exterior region
+% this is the exterior region if this region is meshed by itself
+g{3}.exteriorRegion = 'regionB';
+% rotate a bit around (0,0); make sure boundaries of regions do not
+% intersect!
+g{3} = g{3}.rotate(pointObject(0,0),-pi/50);
+tmp = g{3};
+figure;
+tmp.initMesh('showMesh',showMesh);
+% Note: you can create your own boundary type by implementing the
+% boundaryConditionObject interface
+%% Create polygon  with left region = regionA and right region = regionB with left region being declared as the exterior region
+pts{1} = pointObject(0,0);
+pts{2} = pts{1} + [0,1];
+pts{3} = pts{2} + [1,1];
+pts{4} = pts{3} + [1,-1];
+pts{5} = pts{4} - [0,1];
+leftRegion = 'regionA';
+rightRegion = 'regionB';
+isClockwise = true;
+g{4} = geometryObject.createPolygon('name','poly3','points',pts,'leftRegion',leftRegion,'rightRegion',rightRegion,...
+    'clockwise',isClockwise);
+tmp = g{4};
+figure;
+tmp.initMesh('showMesh',showMesh);
+%% Combine previous regions
+% Note: g{1}..g{4} should not have intersecting boundaries or the same
+% boundary present in more than one region (geometryObject)
+g{5} = g{1} + g{2} + g{3} + g{4};
+% set exterior region to be the same as that for the polygon i.e. regionA
+% Before calling initMesh(), a single exteriorRegion must have been defined
+g{5}.exteriorRegion = g{4}.exteriorRegion;
+tmp = g{5};
+figure;
+tmp.initMesh('showMesh',showMesh);
+% By careful specification of regions we can mesh where we like
+%% Add a scaled, translated, rotated copy of the composite geometry
+g{6} = g{5}.scale(0.5).translate(pointObject(2.5,0)).rotate(pointObject(2.6,0),...
+    pi/4);
+g{7} = g{5} + g{6};
+g{7}.exteriorRegion = g{6}.exteriorRegion();
+figure;
+tmp = g{7}.initMesh('showMesh',showMesh);
+%% Query for region (sub-domain) Ids; useful for specifying boundary conditions, formulation
+display 'regionB id'
+tmp.getRegionToId('regionB')
+display 'region A id'
+tmp.getRegionToId('regionA')
+%% Get handle to geometry function that can be passed to adaptmesh()
+display 'handle to geometry function'
+geometryFunction = @tmp.geometryFunction
+% e.g. adaptmesh(geometryFunction,...)
+%% Pass mesh to assempde()
+% e.g. assempde(...,tmp.mesh.p,tmp.mesh.e,tmp.mesh.t,...)
+%% Create geometry from parametric segments (requires Symbolic Math Toolbox)
+% define parametric segments for the geometry and create PDE geometry
+syms r;
+xSym = 2*cos(r);
+ySym = 3*sin(r);
+% segment 1 with parametric curve(2*cos(r),3*sin(r))
+le{1} = parametricLineObject('pl4',xSym,ySym,0,pi);
+le{1}.leftRegion = 'regionA';
+le{1}.rightRegion = 'regionB';
+ySym = ySym + sin(7*r);
+% segment 2 with modified expression for y
+% We need to make sure that the second segment starts where the first segment ends
+le{2} = parametricLineObject('pl5',xSym,ySym,pi,3/2*pi);
+le{2}.leftRegion = 'regionA';
+le{2}.rightRegion = 'regionB';
+% segment 3 - straight line connects the start and end points of the
+% previous segments
+le{3} = lineObject('pl6',le{2}.endPoint(),le{1}.startPoint());
+le{3}.leftRegion = 'regionA';
+le{3}.rightRegion = 'regionB';
+g{8} = geometryObject('paramBased',le);
+g{8}.exteriorRegion = 'regionB';
+tmp = g{8};
+figure;
+tmp.initMesh('showMesh',showMesh);
+%% Create geometry from image (requires Image Processing Toolbox)
+% read image, identify relevant boundaries and create PDE geometry
+im = imread('testImage.png');
+figure;
+image(im);
+% create geometries from recognized boundaries of image
+[imgs,isClockwise] = geometryObject.createGeometriesFromImage('image','testImage.png','minimumPoints',15);
+% 1. not all geometries created this way are interesting or what we expect. 
+% We need manually verify by plotting the geometries individually.
+% Here we combine the ones with indices 3,4,..end that apriori have
+% been determined to be the ones we are interested in (by calling
+% the plot() method per geometry)
+% 2. Set interior and exterior regions
+% for geometry 3, we want regionC to be exterior and regionB to be interior
+tmp = imgs{3}.setInteriorExteriorRegions('regionB','regionC',isClockwise);
+for k=4:length(imgs)
+    imgs{k} = imgs{k}.setInteriorExteriorRegions('regionA','regionB',isClockwise);
+    tmp = tmp + imgs{k};
+end
+% set exterior region for combined geometry
+tmp.exteriorRegion = 'regionC';
+% get limits of geometry to transform the coordinates
+[xmin,ymin,xmax,ymax] = tmp.getLimitsXY();
+% get rid of XY offsets and scale model to be of size ~ 1
+tmp = tmp.translate(pointObject(0-xmin,0-ymin)).scale(1/max(abs(xmax-xmin),abs(ymax-ymin)));
+figure;
+tmp.initMesh('showMesh',showMesh);
+end
+##### SOURCE END #####
+--></body></html>

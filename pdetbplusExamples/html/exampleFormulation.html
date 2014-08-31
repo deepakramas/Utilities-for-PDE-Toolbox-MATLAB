@@ -1,0 +1,317 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>exampleFormulation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-23"><meta name="DC.source" content="exampleFormulation.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Solve Laplace's equation on a 4-sided polygon</a></li><li><a href="#3">Define geometry using geometryObject class</a></li><li><a href="#4">Define boundary conditions using boundaryConditionObject class</a></li><li><a href="#5">Define coefficients using coeffsObject class</a></li><li><a href="#6">Solve</a></li><li><a href="#7">Post-process : integration on boundary and area</a></li><li><a href="#8">Post-process: Create and use <img src="exampleFormulation_eq08106.png" alt="$u(x,y)$"> function from solution <img src="exampleFormulation_eq35435.png" alt="$u$"></a></li><li><a href="#9">Documentation of classes</a></li><li><a href="#11">More info and other examples</a></li></ul></div><h2>Solve Laplace's equation on a 4-sided polygon<a name="1"></a></h2><p><b>Introduction</b></p><p>Laplace's equation <img src="exampleFormulation_eq46858.png" alt="$(\nabla^2 u = 0)$"> is solved on a 4-sided polygon domain. Sides 1 and 3 have Dirichlet BC, <img src="exampleFormulation_eq90837.png" alt="$u = 5$">, sides 2 and 4 have Neumann BC, <img src="exampleFormulation_eq10409.png" alt="$\nabla u.n = 0$"></p><pre class="codeinput"><span class="keyword">function</span> exampleFormulation
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import package for accessing the geometryObject, boundaryConditionObject and coeffsObject classes</span>
+</pre><h2>Define geometry using geometryObject class<a name="3"></a></h2><p>Define geometry and mesh it.</p><pre class="codeinput"><span class="comment">% Start by defining points of the polygon</span>
+pts{1} = pointObject(0.0,0.0);
+pts{2} = pointObject(5,10);
+pts{3} = pointObject(10,8);
+pts{4} = pointObject(9,1);
+<span class="comment">% Specify the inside and outside regions</span>
+leftRegion = <span class="string">'air'</span>;
+rightRegion = <span class="string">'fooMaterial'</span>;
+<span class="comment">% Close polygon</span>
+leaveOpen = false;
+<span class="comment">% Left region is exterior</span>
+leftRegionIsExterior = true;
+g = geometryObject.createPolygon(<span class="string">'name'</span>,<span class="string">'fooPolygon'</span>,<span class="string">'points'</span>,pts,<span class="string">'leftRegion'</span>,leftRegion,<span class="string">'rightRegion'</span>,rightRegion,<span class="keyword">...</span>
+    <span class="string">'leftRegionIsExterior'</span>,leftRegionIsExterior,<span class="string">'leaveOpen'</span>,leaveOpen);
+<span class="comment">% Although exterior region has been set, good practice to set it explicitly</span>
+g.exteriorRegion = <span class="string">'air'</span>;
+figure(1);
+g = g.initMesh(<span class="string">'showMesh'</span>,true); <span class="comment">% note this is an initial mesh that could be changed by adaptmesh()</span>
+<span class="comment">% Set dimension of the problem to 1</span>
+N = 1;
+</pre><img vspace="5" hspace="5" src="exampleFormulation_01.png" alt=""> <h2>Define boundary conditions using boundaryConditionObject class<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Instantiate boundary condition object</span>
+bc = boundaryConditionObject(g,N);
+<span class="comment">% Use built in Dirichlet option</span>
+bc.add(<span class="string">'name'</span>,g.boundary{1}.name,<span class="string">'dirichlet'</span>,5);
+bc.add(<span class="string">'name'</span>,g.boundary{3}.name,<span class="string">'dirichlet'</span>,0);
+<span class="comment">% Specifying Neumann BC can be skipped since it is a natural BC.</span>
+<span class="comment">% However it is set below in 2 different ways for illustration.</span>
+bc.add(<span class="string">'name'</span>,g.boundary{2}.name,<span class="string">'neumann'</span>,0);
+<span class="comment">% BC can also be specified in terms of a function for more flexibility</span>
+  <span class="keyword">function</span> [hval,rval,qval,gval] = bcondNeumann(x,y,u,t)
+        rval = [];
+        hval = [];
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    <span class="keyword">end</span>
+bc.add(<span class="string">'name'</span>,g.boundary{4}.name,<span class="string">'xyutFunction'</span>,@bcondNeumann);
+</pre><h2>Define coefficients using coeffsObject class<a name="5"></a></h2><pre class="codeinput">coeffs = coeffsObject(g,N);
+<span class="comment">% Specify coefficients using functions.</span>
+<span class="comment">% Since we are solving a Laplace problem "a" coefficient is zero</span>
+<span class="comment">% Define "c" coefficient</span>
+    <span class="keyword">function</span> cij = cCoeff(x,y,u,ux,uy,time) <span class="comment">% receive x,y,y,ux,uy at centroids</span>
+        cij = [1 0; 0 1];
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> fi = fCoeff(x,y,u,ux,uy,time) <span class="comment">% receive x,y,y,ux,uy at centroids</span>
+        fi = zeros(N,1);
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> aij = aCoeff(x,y,u,ux,uy,time) <span class="comment">% receive x,y,y,ux,uy at centroids</span>
+        aij = zeros(N,N);
+    <span class="keyword">end</span>
+<span class="comment">% Add coefficient functions</span>
+coeffs.add(<span class="string">'region'</span>,<span class="string">'fooMaterial'</span>,<span class="string">'fiFunction'</span>,@fCoeff,<span class="string">'cijFunction'</span>,@cCoeff,<span class="string">'aijFunction'</span>,@aCoeff);
+</pre><h2>Solve<a name="6"></a></h2><pre class="codeinput"><span class="comment">% Supply initial guess even though problem is linear</span>
+u0 = zeros(size(g.mesh.p,2),1);
+[u,p,e,t] = adaptmesh(g.geometryFunction,bc.bcFunction,coeffs.cFunction,coeffs.aFunction,coeffs.fFunction,<span class="string">'Init'</span>,u0,<span class="string">'Ngen'</span>,1);
+<span class="comment">% Reset mesh in g, since adaptive mesh changed mesh size</span>
+g.mesh = meshObject(<span class="string">'p'</span>,p,<span class="string">'e'</span>,e,<span class="string">'t'</span>,t);
+</pre><pre class="codeoutput">Number of triangles: 198
+Number of triangles: 238
+
+Maximum number of refinement passes obtained.
+</pre><h2>Post-process : integration on boundary and area<a name="7"></a></h2><pre class="codeinput"><span class="comment">% Integrate ||c grad u.n||^2 along boundary of region</span>
+<span class="comment">% Define boundary integrand.</span>
+    <span class="keyword">function</span> val = integrandNeumann(xmid,ymid,nxmid,nymid,inputs)
+        ux = inputs{1};
+        uy = inputs{2};
+        val = (ux*nxmid + uy*nymid)^2;
+    <span class="keyword">end</span>
+<span class="comment">% Get c grad u</span>
+[cdudx,cdudy] = pdecgrad(g.mesh.p,g.mesh.t,coeffs.cFunction,u);
+<span class="comment">% Notice how inner region is specified as 'air' below because integration</span>
+<span class="comment">% is done 'outside' a boundary. Since there are no triangles in air and there are triangles in the interior region, we</span>
+<span class="comment">% flip the meaning of the inner and outer regions</span>
+figure(2);
+<span class="comment">% Integrate</span>
+val1 = g.integrateOutsideBoundary(<span class="string">'innerRegion'</span>,<span class="string">'air'</span>,<span class="string">'outerRegion'</span>,<span class="string">'fooMaterial'</span>,<span class="string">'integrand'</span>,@integrandNeumann,<span class="keyword">...</span>
+    <span class="string">'showBoundary'</span>,true,<span class="string">'showBoundaryClear'</span>,false,<span class="string">'integrandInput'</span>,{cdudx,cdudy});
+g.plot(); <span class="comment">%overlay geometry</span>
+fprintf(<span class="string">'||grad u.n||^2 along air-material boundary = %e \n'</span>,val1);
+
+<span class="comment">% Integrate u*sqrt(x^2+y^2) on region using geometryObject class</span>
+<span class="comment">% Define region integrand.</span>
+    <span class="keyword">function</span> val = integrandSegs(xmid,ymid,inputs)
+        umid = inputs{1};
+        val = umid*sqrt(xmid^2+ymid^2); <span class="comment">% some function</span>
+    <span class="keyword">end</span>
+<span class="comment">% Interpolate u from mesh vertices to centroids of mesh elements</span>
+utriangles = pdeintrp(g.mesh.p,g.mesh.t,u);
+<span class="comment">% Integrate</span>
+val2 = g.integrateOverRegion(<span class="string">'integrand'</span>,@integrandSegs,<span class="string">'region'</span>,<span class="string">'fooMaterial'</span>,<span class="string">'integrandInput'</span>,{utriangles});
+fprintf(<span class="string">'integral of distance weighted solution = integral(sqrt(x^2+y^2)*u) over interior region = %e\n'</span>,val2);
+<span class="comment">% Plot</span>
+figure(3);
+pdeplot(g.mesh.p, g.mesh.e, g.mesh.t, <span class="string">'xydata'</span>, u, <span class="string">'contour'</span>, <span class="string">'on'</span>);
+</pre><pre class="codeoutput">||grad u.n||^2 along air-material boundary = 9.866139e+00 
+integral of distance weighted solution = integral(sqrt(x^2+y^2)*u) over interior region = 1.170931e+03
+</pre><img vspace="5" hspace="5" src="exampleFormulation_02.png" alt=""> <img vspace="5" hspace="5" src="exampleFormulation_03.png" alt=""> <h2>Post-process: Create and use <img src="exampleFormulation_eq08106.png" alt="$u(x,y)$"> function from solution <img src="exampleFormulation_eq35435.png" alt="$u$"><a name="8"></a></h2><p>Integrate <img src="exampleFormulation_eq15729.png" alt="$u^2$"> on a horizontal line (2,4) and (pt2x,4) between first and third boundaries. Height of the line is 4. Create solution as a function of (x,y)</p><pre class="codeinput">uxy = g.createXYFunctionFromNodalSolution(u);
+<span class="comment">% Create line integrand</span>
+lineIntegrand = @(x) uxy(x,4).^2; <span class="comment">% bind second coordinate to 4</span>
+<span class="comment">% Get x value on third boundary with line, y = 4</span>
+pt2x = interp1([pts{4}.y pts{3}.y],[pts{4}.x pts{3}.x],4);
+<span class="comment">% Integrate</span>
+lineIntegralValue = integral(lineIntegrand,2,pt2x);
+fprintf(<span class="string">'lineIntegralValue between (2,4) and (%0.3f,4) = %e\n'</span>,pt2x,lineIntegralValue);
+</pre><pre class="codeoutput">lineIntegralValue between (2,4) and (9.429,4) = 7.046858e+01
+</pre><h2>Documentation of classes<a name="9"></a></h2><p>See help for <a href="matlab:doc('pdetbplus.geometryObject')">geometryObject</a> <a href="matlab:doc('pdetbplus.pointObject')">pointObject</a> <a href="matlab:doc('pdetbplus.coeffsObject')">coeffsObject</a> <a href="matlab:doc('pdetbplus.boundaryConditionObject')">boundaryConditionObject</a> <a href="matlab:doc('pdetbplus.meshObject')">meshObject</a></p><h2>More info and other examples<a name="11"></a></h2><p><a href="README.html">See other examples</a></p><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Solve Laplace's equation on a 4-sided polygon
+% *Introduction*
+%
+% Laplace's equation $(\nabla^2 u = 0)$ is solved on a 4-sided polygon domain.
+% Sides 1 and 3 have Dirichlet BC, $u = 5$, sides 2 and 4 have Neumann BC,
+% $\nabla u.n = 0$
+%
+%  
+function exampleFormulation
+import pdetbplus.*; % import package for accessing the geometryObject, boundaryConditionObject and coeffsObject classes
+
+%% Define geometry using geometryObject class
+% Define geometry and mesh it.
+
+% Start by defining points of the polygon
+pts{1} = pointObject(0.0,0.0);
+pts{2} = pointObject(5,10);
+pts{3} = pointObject(10,8);
+pts{4} = pointObject(9,1);
+% Specify the inside and outside regions
+leftRegion = 'air';
+rightRegion = 'fooMaterial';
+% Close polygon
+leaveOpen = false;
+% Left region is exterior
+leftRegionIsExterior = true;
+g = geometryObject.createPolygon('name','fooPolygon','points',pts,'leftRegion',leftRegion,'rightRegion',rightRegion,...
+    'leftRegionIsExterior',leftRegionIsExterior,'leaveOpen',leaveOpen);
+% Although exterior region has been set, good practice to set it explicitly
+g.exteriorRegion = 'air';
+figure(1);
+g = g.initMesh('showMesh',true); % note this is an initial mesh that could be changed by adaptmesh()
+% Set dimension of the problem to 1
+N = 1;
+
+%% Define boundary conditions using boundaryConditionObject class
+
+% Instantiate boundary condition object
+bc = boundaryConditionObject(g,N);
+% Use built in Dirichlet option
+bc.add('name',g.boundary{1}.name,'dirichlet',5);
+bc.add('name',g.boundary{3}.name,'dirichlet',0);
+% Specifying Neumann BC can be skipped since it is a natural BC.
+% However it is set below in 2 different ways for illustration.
+bc.add('name',g.boundary{2}.name,'neumann',0);
+% BC can also be specified in terms of a function for more flexibility
+  function [hval,rval,qval,gval] = bcondNeumann(x,y,u,t)
+        rval = [];
+        hval = [];
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    end
+bc.add('name',g.boundary{4}.name,'xyutFunction',@bcondNeumann);
+
+%% Define coefficients using coeffsObject class
+
+coeffs = coeffsObject(g,N);
+% Specify coefficients using functions.
+% Since we are solving a Laplace problem "a" coefficient is zero
+% Define "c" coefficient
+    function cij = cCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+        cij = [1 0; 0 1];
+    end
+    function fi = fCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+        fi = zeros(N,1);
+    end
+    function aij = aCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+        aij = zeros(N,N);
+    end
+% Add coefficient functions
+coeffs.add('region','fooMaterial','fiFunction',@fCoeff,'cijFunction',@cCoeff,'aijFunction',@aCoeff);
+
+%% Solve
+
+% Supply initial guess even though problem is linear
+u0 = zeros(size(g.mesh.p,2),1);
+[u,p,e,t] = adaptmesh(g.geometryFunction,bc.bcFunction,coeffs.cFunction,coeffs.aFunction,coeffs.fFunction,'Init',u0,'Ngen',1);
+% Reset mesh in g, since adaptive mesh changed mesh size
+g.mesh = meshObject('p',p,'e',e,'t',t);
+
+%% Post-process : integration on boundary and area
+
+% Integrate ||c grad u.n||^2 along boundary of region
+% Define boundary integrand.
+    function val = integrandNeumann(xmid,ymid,nxmid,nymid,inputs)
+        ux = inputs{1};
+        uy = inputs{2};
+        val = (ux*nxmid + uy*nymid)^2;
+    end
+% Get c grad u
+[cdudx,cdudy] = pdecgrad(g.mesh.p,g.mesh.t,coeffs.cFunction,u);
+% Notice how inner region is specified as 'air' below because integration
+% is done 'outside' a boundary. Since there are no triangles in air and there are triangles in the interior region, we
+% flip the meaning of the inner and outer regions
+figure(2);
+% Integrate
+val1 = g.integrateOutsideBoundary('innerRegion','air','outerRegion','fooMaterial','integrand',@integrandNeumann,...
+    'showBoundary',true,'showBoundaryClear',false,'integrandInput',{cdudx,cdudy});
+g.plot(); %overlay geometry
+fprintf('||grad u.n||^2 along air-material boundary = %e \n',val1);
+
+% Integrate u*sqrt(x^2+y^2) on region using geometryObject class
+% Define region integrand.
+    function val = integrandSegs(xmid,ymid,inputs)
+        umid = inputs{1};
+        val = umid*sqrt(xmid^2+ymid^2); % some function
+    end
+% Interpolate u from mesh vertices to centroids of mesh elements
+utriangles = pdeintrp(g.mesh.p,g.mesh.t,u);
+% Integrate
+val2 = g.integrateOverRegion('integrand',@integrandSegs,'region','fooMaterial','integrandInput',{utriangles});
+fprintf('integral of distance weighted solution = integral(sqrt(x^2+y^2)*u) over interior region = %e\n',val2);
+% Plot
+figure(3);
+pdeplot(g.mesh.p, g.mesh.e, g.mesh.t, 'xydata', u, 'contour', 'on');
+
+%% Post-process: Create and use $u(x,y)$ function from solution $u$
+% Integrate $u^2$ on a horizontal line (2,4) and (pt2x,4) between first and third boundaries. Height of the line is 4.
+% Create solution as a function of (x,y)
+uxy = g.createXYFunctionFromNodalSolution(u);
+% Create line integrand
+lineIntegrand = @(x) uxy(x,4).^2; % bind second coordinate to 4
+% Get x value on third boundary with line, y = 4
+pt2x = interp1([pts{4}.y pts{3}.y],[pts{4}.x pts{3}.x],4);
+% Integrate
+lineIntegralValue = integral(lineIntegrand,2,pt2x);
+fprintf('lineIntegralValue between (2,4) and (%0.3f,4) = %e\n',pt2x,lineIntegralValue);
+
+%% Documentation of classes
+%%
+% See help for <matlab:doc('pdetbplus.geometryObject') geometryObject>
+% <matlab:doc('pdetbplus.pointObject') pointObject> <matlab:doc('pdetbplus.coeffsObject')
+% coeffsObject> <matlab:doc('pdetbplus.boundaryConditionObject') boundaryConditionObject>
+% <matlab:doc('pdetbplus.meshObject') meshObject>
+
+%% More info and other examples
+%%
+% <README.html See other examples>
+end
+##### SOURCE END #####
+--></body></html>

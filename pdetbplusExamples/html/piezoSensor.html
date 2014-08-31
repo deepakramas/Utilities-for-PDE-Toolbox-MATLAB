@@ -1,0 +1,564 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>piezoSensor</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-23"><meta name="DC.source" content="piezoSensor.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Electrode voltage profile for piezoelectric sensor</a></li><li><a href="#3">Geometry</a></li><li><a href="#4">Boundary conditions</a></li><li><a href="#5">Coefficients</a></li><li><a href="#7">Solve</a></li><li><a href="#8">Post-process</a></li><li><a href="#9">Documentation of classes</a></li><li><a href="#11">More info and other examples</a></li></ul></div><h2>Electrode voltage profile for piezoelectric sensor<a name="1"></a></h2><p><b>Introduction</b></p><p>The Reference mentioned below solved the piezoelectric problem in actuation mode. This problem solves for the same problem shown in the Reference but now in sensor mode. 10 equally spaced electrodes are placed on top as shown in the picture below. A vertical tip displacement is specified and the voltages on the electrodes are measured. This problem</p><div><ul><li>Solves the piezoelectric problem in actuation mode and measures voltages in response to a vertical displacement</li><li>Specifies linear constitutive equations for PVDF using Symbolic Math Toolbox (R2012b or greater)</li><li>Shows a convenient way to specify constrained (tied) BCs</li><li>Shows a way to specify a BC value at a node</li></ul></div><p><img vspace="5" hspace="5" src="piezoSensorSetup.PNG" alt=""> </p><p><b>Requirements:</b> PDE Toolbox, Helper classes for PDE Toolbox, Symbolic Math Toolbox (R2012b and greater)</p><p><b>References</b> : <a href="http://www.mathworks.com/help/pde/examples/deflection-of-a-piezoelectric-actuator.html">http://www.mathworks.com/help/pde/examples/deflection-of-a-piezoelectric-actuator.html</a></p><pre class="codeinput"><span class="comment">%</span>
+<span class="keyword">function</span> piezoSensor
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% use helper classes</span>
+</pre><h2>Geometry<a name="3"></a></h2><pre class="codeinput">L = 50e-3;
+H = 1e-3;
+<span class="comment">% specify boundaries</span>
+p{1} = pointObject(0,0);
+p{2} = pointObject(0,H/2);
+a{1} = lineObject(<span class="string">'wall1'</span>,p{1},p{2});
+<span class="comment">% specify electrode boundaries</span>
+numElectrodes  = 10;
+spacing = H/20;
+electrodeLength = (L-(numElectrodes-1)*spacing)/numElectrodes;
+<span class="keyword">for</span> k=1:numElectrodes-1
+    p{end+1} = pointObject(k*electrodeLength,H/2);
+    a{end+1} = lineObject(strcat(<span class="string">'electrode'</span>,num2str(k)),p{end-1},p{end});
+    p{end+1} = p{end} + [spacing,0];
+    a{end+1} = lineObject(strcat(<span class="string">'gapElectrode'</span>,num2str(k)),p{end-1},p{end});
+<span class="keyword">end</span>
+p{end+1} = pointObject(L,H/2);
+<span class="comment">% boundary for final electrode</span>
+a{end+1} = lineObject(<span class="string">'electrode10'</span>,p{end-1},p{end});
+p{end+1} = pointObject(L,0);
+a{end+1} = lineObject(<span class="string">'free1'</span>,p{end-1},p{end});
+<span class="keyword">for</span> k=1:length(a)
+    a{k}.leftRegion = <span class="string">'nonMeshedSpace'</span>;
+    a{k}.rightRegion = <span class="string">'beamMaterial1'</span>; <span class="comment">% there are two regions to the beam</span>
+<span class="keyword">end</span>
+a{end+1} = lineObject(<span class="string">'separator'</span>,p{end},p{1});
+a{end}.leftRegion = <span class="string">'beamMaterial2'</span>;
+a{end}.rightRegion = <span class="string">'beamMaterial1'</span>;
+topPartLength = length(a);
+<span class="comment">% boundaries for lower part</span>
+p{end+1} = pointObject(L,-H/2);
+a{end+1} = lineObject(<span class="string">'free2'</span>,p{end-1},p{end});
+p{end+1} = pointObject(0,-H/2);
+a{end+1} = lineObject(<span class="string">'bottom'</span>,p{end-1},p{end});
+a{end+1} = lineObject(<span class="string">'wall2'</span>,p{end},p{1});
+<span class="keyword">for</span> k=topPartLength+1:length(a)
+    a{k}.leftRegion = <span class="string">'nonMeshedSpace'</span>;
+    a{k}.rightRegion = <span class="string">'beamMaterial2'</span>;
+<span class="keyword">end</span>
+<span class="comment">% create geometries</span>
+beamTop = geometryObject(<span class="string">'beamTop'</span>,a(1:topPartLength));
+beamBottom = geometryObject(<span class="string">'beamBottom'</span>,a(topPartLength+1:end));
+beam = beamTop + beamBottom;
+beam.exteriorRegion = <span class="string">'nonMeshedSpace'</span>;
+beam = beam.initMesh(<span class="string">'showMesh'</span>,true,<span class="string">'Hmax'</span>,H/5); axis(<span class="string">'equal'</span>);
+</pre><pre class="codeoutput">
+warning: Approximately 2500 triangles will be generated.
+</pre><img vspace="5" hspace="5" src="piezoSensor_01.png" alt=""> <h2>Boundary conditions<a name="4"></a></h2><pre class="codeinput">N = 3; <span class="comment">% output dimension</span>
+<span class="comment">% instantiate boundaryConditionObject for convenient definition of BCs</span>
+bc = boundaryConditionObject(beam, N);
+    <span class="keyword">function</span> [hval,rval,qval,gval] = bcondWall(x,y,u,t)
+        <span class="comment">% Dirichlet condition on the boundary</span>
+        rval = zeros(N,1);
+        hval = speye(N); <span class="comment">% u,v are zero on wall</span>
+        hval(3,3) = 0;
+        qval = [];
+        gval = [];
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = bcondBottom(x,y,u,t)
+        <span class="comment">% Dirichlet condition on the boundary</span>
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        hval(3,3) = 1; <span class="comment">% potential is 0 on bottom boundary</span>
+        qval = [];
+        gval = [];
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = bcondFree(x,y,u,t)
+        <span class="comment">% Dirichlet condition on the boundary</span>
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        qval = [];
+        gval = [];
+    <span class="keyword">end</span>
+bc.add(<span class="string">'name'</span>,<span class="string">'free1'</span>,<span class="string">'xyutFunction'</span>,@bcondFree);
+bc.add(<span class="string">'name'</span>,<span class="string">'free2'</span>,<span class="string">'xyutFunction'</span>,@bcondFree);
+bc.add(<span class="string">'name'</span>,<span class="string">'wall1'</span>,<span class="string">'xyutFunction'</span>,@bcondWall);
+bc.add(<span class="string">'name'</span>,<span class="string">'wall2'</span>,<span class="string">'xyutFunction'</span>,@bcondWall);
+bc.add(<span class="string">'name'</span>,<span class="string">'bottom'</span>,<span class="string">'xyutFunction'</span>,@bcondBottom);
+[Qmat,Gmat,Hmat,Rmat] = bc.getMatrices(); <span class="comment">% global BC matrices so far</span>
+<span class="comment">% additional BC matrices for setting voltages on electrode to be the same</span>
+Hadd = [];
+Radd = [];
+<span class="keyword">for</span> k=1:numElectrodes
+    electrodeName = strcat(<span class="string">'electrode'</span>,num2str(k));
+    <span class="comment">% tie voltage i.e. 3rd dimension to be same on boundary electrodeName</span>
+    [HaddInc,RaddInc] = bc.getGlobalHR(<span class="string">'name'</span>,electrodeName,<span class="string">'type'</span>,<span class="string">'tie'</span>,<span class="string">'dimension'</span>,3);
+    Radd = [Radd;RaddInc];
+    Hadd = [Hadd;HaddInc];
+<span class="keyword">end</span>
+<span class="comment">% combine global BC matrices</span>
+Hmat = [Hmat;Hadd];
+Rmat = [Rmat;Radd];
+<span class="comment">% final BC for point load</span>
+freeBoundaryNodes = beam.getBoundaryNodes(<span class="string">'name'</span>,<span class="string">'free1'</span>); <span class="comment">% get all boundary nodes on free1</span>
+[~,ix] = max(beam.mesh.p(2,freeBoundaryNodes)); <span class="comment">% node with maximum y coordinate i.e. tip node</span>
+pointDisplacementNode = freeBoundaryNodes(ix); <span class="comment">% find node of interest</span>
+<span class="comment">% set a vertical displacement of -10e-3 at tip</span>
+[HaddPointDisplacement,RaddPointDisplacement] = bc.getGlobalHR(<span class="string">'type'</span>,<span class="string">'point'</span>,<span class="string">'nodes'</span>,pointDisplacementNode,<span class="string">'value'</span>,-10e-3,<span class="string">'dimension'</span>,2);
+HmatComplete = [Hmat;HaddPointDisplacement];
+RmatComplete = [Rmat;RaddPointDisplacement];
+</pre><h2>Coefficients<a name="5"></a></h2><pre class="codeinput">numNodes = size(beam.mesh.p,2);
+<span class="comment">% create functions out of frequency domain piezoelectric equations</span>
+</pre><pre class="language-matlab"><span class="comment">% Define piezoelectric equations (strain-charge formulation) using Symbolic Math Toolbox; To avoid errors, make</span>
+<span class="comment">% this function standalone instead of a nested function</span>
+<span class="keyword">function</span> [equations,variables] = piezoEquationsFreq(varargin)
+displayEquations = true;
+E = 0;nu = 0;G = 0;d31 = 0;d33 = 0;epsr = 0;rho = 0;s = 0;eps0 = 8.854187817620e-12;
+<span class="keyword">for</span> k=1:2:length(varargin)
+  a = varargin(k);
+  b = varargin(k+1);
+  <span class="keyword">if</span> strcmp(a,<span class="string">'E'</span>)
+      E = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'nu'</span>)
+      nu = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'G'</span>)
+      G = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'d31'</span>)
+      d31 = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'d33'</span>)
+      d33 = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'epsr'</span>)
+      epsr = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'rho'</span>)
+      rho = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'s'</span>)
+      s = b{1};
+  <span class="keyword">elseif</span> strcmp(a,<span class="string">'displayEquations'</span>)
+      displayEquations = b{1};
+  <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">if</span> G == 0
+   G = E/(2*(1+nu));
+<span class="keyword">end</span>
+<span class="comment">%% PDE input, define eq and input;</span>
+<span class="comment">% *Reserved keywords: x,y,time,ddx,ddy,d[variable]dx,d[variable]dy*</span>
+<span class="comment">% *specify the Div operator as [ddx ddy]</span>
+syms <span class="string">ddx</span> <span class="string">ddy</span> <span class="string">real</span>;
+<span class="comment">% user input begins</span>
+syms <span class="string">u</span> <span class="string">v</span> <span class="string">dudx</span> <span class="string">dudy</span> <span class="string">dvdx</span> <span class="string">dvdy</span> <span class="string">real</span>;
+<span class="comment">%% material constants</span>
+C11 = E/(1-nu^2);
+C12 = C11*nu; C21=C12;
+C22 = C11;
+C66 = G;
+<span class="comment">%% Linear strain tensor</span>
+epsilon11 = dudx;
+epsilon22 = dvdy;
+epsilon12 = (dudy+dvdx)/2;
+<span class="comment">%% stress equations</span>
+Sx = C11*epsilon11 + C12*epsilon22;
+Sy = C21*epsilon11 + C22*epsilon22;
+Txy = C66*2*epsilon12; <span class="comment">% watch out for factor of 2 for engineering strain</span>
+strainStress = [Sx;Sy;Txy];
+<span class="comment">% The piezoelectric strain coefficients for PVDF</span>
+<span class="comment">% The notation of the d matrix is different from those in standard references</span>
+<span class="comment">% the "3" in dn3 below is not the z direction but is the y direction.</span>
+d = [0 d31; 0 d33; 0 0];
+syms <span class="string">E1</span> <span class="string">E2</span> <span class="string">phi</span> <span class="string">dphidx</span> <span class="string">dphidy</span> <span class="string">xi</span> <span class="string">D</span> <span class="string">real</span>;
+E1 = -dphidx;
+E2 = -dphidy;
+C = [C11 C12 0;C12 C22 0;0 0 C66];
+e = C*d;
+pzeStress = -e*[E1;E2];
+stressSigma = strainStress + pzeStress; <span class="comment">% linearized stress</span>
+stress = [stressSigma(1) stressSigma(3);stressSigma(3) stressSigma(2)];
+permitt = eps0*epsr*eye(2); <span class="comment">% constant stress permittivity matrix</span>
+permitt = permitt - d.'*(C\d); <span class="comment">% constant strain permittivity matrix</span>
+D = (e'*[epsilon11;epsilon22;2*epsilon12] + permitt*[E1;E2]); <span class="comment">% electric displacement equation</span>
+equations = -[ddx ddy]*[stress D] + s^2*rho*[u v 0]; <span class="comment">% the PDE</span>
+<span class="keyword">if</span> displayEquations
+  display <span class="string">Problem_Equations</span>;
+  equations'
+<span class="keyword">end</span>
+variables = [u v phi];
+<span class="keyword">end</span>
+</pre><pre class="codeinput">piezoEquations1 = @() piezoEquationsFreq(<span class="string">'E'</span>,2e9,<span class="string">'nu'</span>,0.29,<span class="string">'G'</span>,0.775e9,<span class="string">'d31'</span>,2.2e-11',<span class="string">'d33'</span>,-3e-11,<span class="string">'epsr'</span>,12,<span class="string">'s'</span>,0);
+<span class="comment">% flip sign of d31 and d33</span>
+piezoEquations2 = @() piezoEquationsFreq(<span class="string">'E'</span>,2e9,<span class="string">'nu'</span>,0.29,<span class="string">'G'</span>,0.775e9,<span class="string">'d31'</span>,-2.2e-11',<span class="string">'d33'</span>,3e-11,<span class="string">'epsr'</span>,12,<span class="string">'s'</span>,0);
+coeff = coeffsObject(beam, N);
+coeff.add(<span class="string">'region'</span>,<span class="string">'beamMaterial1'</span>,<span class="string">'symbolicEquationFunction'</span>,piezoEquations1); <span class="comment">% requires Symbolic Math Toolbox</span>
+coeff.add(<span class="string">'region'</span>,<span class="string">'beamMaterial2'</span>,<span class="string">'symbolicEquationFunction'</span>,piezoEquations2); <span class="comment">% requires Symbolic Math Toolbox</span>
+[Kmat,Mmat,Fmat] = coeff.getMatrices(<span class="string">'u'</span>,zeros(N*numNodes,1));
+</pre><pre class="codeoutput">Problem_Equations
+ 
+ans =
+ 
+                         - ddy*(775000000*dudy + 775000000*dvdx) - ddx*((266*dphidy)/9159 + (4579434436073807*dudx)/2097152 + (332008996615351*dvdy)/524288)
+                       - ddx*(775000000*dudy + 775000000*dvdx) - ddy*((332008996615351*dudx)/524288 - (2362*dphidy)/45795 + (4579434436073807*dvdy)/2097152)
+ (4110357605544239*ddx*dphidx)/38685626227668133590597632 + ddy*((4110357605544239*dphidy)/38685626227668133590597632 - (266*dudx)/9159 + (2362*dvdy)/45795)
+ 
+Cmatrix
+ 
+  +-                                                                                                                                                               -+ 
+  |  4579434436073807/2097152,     0,         0,      5800000000000/9159,                       0,                                       266/9159                   | 
+  |                                                                                                                                                                 | 
+  |              0,            775000000, 775000000,          0,                                0,                                           0                      | 
+  |                                                                                                                                                                 | 
+  |              0,            775000000, 775000000,          0,                                0,                                           0                      | 
+  |                                                                                                                                                                 | 
+  |   332008996615351/524288,      0,         0,     20000000000000/9159,                       0,                                      -2362/45795                 | 
+  |                                                                                                                                                                 | 
+  |              0,                0,         0,              0,          -4110357605544239/38685626227668133590597632,                      0                      | 
+  |                                                                                                                                                                 | 
+  |          266/9159,             0,         0,         -2362/45795,                           0,                      -957406751230359/9010865545125641773383680  | 
+  +-                                                                                                                                                               -+
+Fvector
+ 
+  +-       -+ 
+  | 0, 0, 0 | 
+  +-       -+
+Problem_Equations
+ 
+ans =
+ 
+                         - ddy*(775000000*dudy + 775000000*dvdx) - ddx*((4579434436073807*dudx)/2097152 - (266*dphidy)/9159 + (332008996615351*dvdy)/524288)
+                       - ddx*(775000000*dudy + 775000000*dvdx) - ddy*((2362*dphidy)/45795 + (332008996615351*dudx)/524288 + (4579434436073807*dvdy)/2097152)
+ (4110357605544239*ddx*dphidx)/38685626227668133590597632 + ddy*((4110357605544239*dphidy)/38685626227668133590597632 + (266*dudx)/9159 - (2362*dvdy)/45795)
+ 
+Cmatrix
+ 
+  +-                                                                                                                                                               -+ 
+  |  4579434436073807/2097152,     0,         0,      5800000000000/9159,                       0,                                       -266/9159                  | 
+  |                                                                                                                                                                 | 
+  |              0,            775000000, 775000000,          0,                                0,                                           0                      | 
+  |                                                                                                                                                                 | 
+  |              0,            775000000, 775000000,          0,                                0,                                           0                      | 
+  |                                                                                                                                                                 | 
+  |   332008996615351/524288,      0,         0,     20000000000000/9159,                       0,                                      2362/45795                  | 
+  |                                                                                                                                                                 | 
+  |              0,                0,         0,              0,          -4110357605544239/38685626227668133590597632,                      0                      | 
+  |                                                                                                                                                                 | 
+  |          -266/9159,            0,         0,          2362/45795,                           0,                      -957406751230359/9010865545125641773383680  | 
+  +-                                                                                                                                                               -+
+Fvector
+ 
+  +-       -+ 
+  | 0, 0, 0 | 
+  +-       -+
+</pre><h2>Solve<a name="7"></a></h2><pre class="codeinput"><span class="comment">% matrix form of assempde() is needed because of the global BC on the</span>
+<span class="comment">% electrodes</span>
+u = assempde(Kmat,Mmat,Fmat,Qmat,Gmat,HmatComplete,RmatComplete);
+</pre><h2>Post-process<a name="8"></a></h2><pre class="codeinput"><span class="comment">% plot potential on top surface</span>
+uu = reshape(u(1:3*numNodes),numNodes,[]);
+phixy = beam.createXYFunctionFromNodalSolution(uu(:,3)); <span class="comment">% x,y voltage function</span>
+phiTop = @(x) abs(phixy(x,H/2-eps)); <span class="comment">% top surface voltage function</span>
+figure(1);ezplot(phiTop,[0,L-eps]); title <span class="string">'voltage profile at top surface of beam for static displacement'</span>;<span class="comment">% plot voltage on top surface</span>
+</pre><img vspace="5" hspace="5" src="piezoSensor_02.png" alt=""> <h2>Documentation of classes<a name="9"></a></h2><p>See help for <a href="matlab:doc('pdetbplus.geometryObject')">geometryObject</a> <a href="matlab:doc('pdetbplus.lineObject')">lineObject</a> <a href="matlab:doc('pdetbplus.pointObject')">pointObject</a> <a href="matlab:doc('pdetbplus.coeffsObject')">coeffsObject</a> <a href="matlab:doc('pdetbplus.boundaryConditionObject')">boundaryConditionObject</a></p><h2>More info and other examples<a name="11"></a></h2><p><a href="README.html">See other examples</a></p><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Electrode voltage profile for piezoelectric sensor
+% *Introduction*
+%
+% The Reference mentioned below solved the piezoelectric problem in
+% actuation mode. This problem solves for the same problem shown in the Reference but now in
+% sensor mode. 10 equally spaced electrodes are placed on top as shown in the picture below. A
+% vertical tip displacement is specified and the voltages on the electrodes
+% are measured. This problem
+%
+% * Solves the piezoelectric problem in actuation mode and measures
+% voltages in response to a vertical displacement
+% * Specifies linear constitutive equations for PVDF using Symbolic Math
+% Toolbox (R2012b or greater)
+% * Shows a convenient way to specify constrained (tied) BCs
+% * Shows a way to specify a BC value at a node
+%
+% 
+% <<piezoSensorSetup.PNG>>
+% 
+% *Requirements:* PDE Toolbox, Helper classes for PDE Toolbox, Symbolic
+% Math Toolbox (R2012b and greater)
+%
+% *References* : http://www.mathworks.com/help/pde/examples/deflection-of-a-piezoelectric-actuator.html
+%
+%  
+%
+function piezoSensor
+import pdetbplus.*; % use helper classes
+
+%% Geometry
+L = 50e-3;
+H = 1e-3;
+% specify boundaries
+p{1} = pointObject(0,0);
+p{2} = pointObject(0,H/2);
+a{1} = lineObject('wall1',p{1},p{2});
+% specify electrode boundaries
+numElectrodes  = 10;
+spacing = H/20;
+electrodeLength = (L-(numElectrodes-1)*spacing)/numElectrodes;
+for k=1:numElectrodes-1
+    p{end+1} = pointObject(k*electrodeLength,H/2);
+    a{end+1} = lineObject(strcat('electrode',num2str(k)),p{end-1},p{end});
+    p{end+1} = p{end} + [spacing,0];
+    a{end+1} = lineObject(strcat('gapElectrode',num2str(k)),p{end-1},p{end});
+end
+p{end+1} = pointObject(L,H/2);
+% boundary for final electrode
+a{end+1} = lineObject('electrode10',p{end-1},p{end});
+p{end+1} = pointObject(L,0);
+a{end+1} = lineObject('free1',p{end-1},p{end});
+for k=1:length(a)
+    a{k}.leftRegion = 'nonMeshedSpace';
+    a{k}.rightRegion = 'beamMaterial1'; % there are two regions to the beam
+end
+a{end+1} = lineObject('separator',p{end},p{1});
+a{end}.leftRegion = 'beamMaterial2';
+a{end}.rightRegion = 'beamMaterial1';
+topPartLength = length(a);
+% boundaries for lower part
+p{end+1} = pointObject(L,-H/2);
+a{end+1} = lineObject('free2',p{end-1},p{end});
+p{end+1} = pointObject(0,-H/2);
+a{end+1} = lineObject('bottom',p{end-1},p{end});
+a{end+1} = lineObject('wall2',p{end},p{1});
+for k=topPartLength+1:length(a)
+    a{k}.leftRegion = 'nonMeshedSpace';
+    a{k}.rightRegion = 'beamMaterial2';
+end
+% create geometries
+beamTop = geometryObject('beamTop',a(1:topPartLength));
+beamBottom = geometryObject('beamBottom',a(topPartLength+1:end));
+beam = beamTop + beamBottom;
+beam.exteriorRegion = 'nonMeshedSpace';
+beam = beam.initMesh('showMesh',true,'Hmax',H/5); axis('equal');
+
+%% Boundary conditions
+N = 3; % output dimension
+% instantiate boundaryConditionObject for convenient definition of BCs
+bc = boundaryConditionObject(beam, N);
+    function [hval,rval,qval,gval] = bcondWall(x,y,u,t)
+        % Dirichlet condition on the boundary
+        rval = zeros(N,1);
+        hval = speye(N); % u,v are zero on wall
+        hval(3,3) = 0;
+        qval = [];
+        gval = [];
+    end
+    function [hval,rval,qval,gval] = bcondBottom(x,y,u,t)
+        % Dirichlet condition on the boundary
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        hval(3,3) = 1; % potential is 0 on bottom boundary
+        qval = [];
+        gval = [];
+    end
+    function [hval,rval,qval,gval] = bcondFree(x,y,u,t)
+        % Dirichlet condition on the boundary
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        qval = [];
+        gval = [];
+    end
+bc.add('name','free1','xyutFunction',@bcondFree);
+bc.add('name','free2','xyutFunction',@bcondFree);
+bc.add('name','wall1','xyutFunction',@bcondWall);
+bc.add('name','wall2','xyutFunction',@bcondWall);
+bc.add('name','bottom','xyutFunction',@bcondBottom);
+[Qmat,Gmat,Hmat,Rmat] = bc.getMatrices(); % global BC matrices so far
+% additional BC matrices for setting voltages on electrode to be the same
+Hadd = [];
+Radd = [];
+for k=1:numElectrodes
+    electrodeName = strcat('electrode',num2str(k));
+    % tie voltage i.e. 3rd dimension to be same on boundary electrodeName
+    [HaddInc,RaddInc] = bc.getGlobalHR('name',electrodeName,'type','tie','dimension',3);
+    Radd = [Radd;RaddInc];
+    Hadd = [Hadd;HaddInc];
+end
+% combine global BC matrices
+Hmat = [Hmat;Hadd];
+Rmat = [Rmat;Radd];
+% final BC for point load
+freeBoundaryNodes = beam.getBoundaryNodes('name','free1'); % get all boundary nodes on free1
+[~,ix] = max(beam.mesh.p(2,freeBoundaryNodes)); % node with maximum y coordinate i.e. tip node
+pointDisplacementNode = freeBoundaryNodes(ix); % find node of interest
+% set a vertical displacement of -10e-3 at tip
+[HaddPointDisplacement,RaddPointDisplacement] = bc.getGlobalHR('type','point','nodes',pointDisplacementNode,'value',-10e-3,'dimension',2);
+HmatComplete = [Hmat;HaddPointDisplacement];
+RmatComplete = [Rmat;RaddPointDisplacement];
+
+%% Coefficients
+numNodes = size(beam.mesh.p,2);
+% create functions out of frequency domain piezoelectric equations
+%%
+% 
+%   % Define piezoelectric equations (strain-charge formulation) using Symbolic Math Toolbox; To avoid errors, make
+%   % this function standalone instead of a nested function
+%   function [equations,variables] = piezoEquationsFreq(varargin)
+%   displayEquations = true;
+%   E = 0;nu = 0;G = 0;d31 = 0;d33 = 0;epsr = 0;rho = 0;s = 0;eps0 = 8.854187817620e-12;
+%   for k=1:2:length(varargin)
+%     a = varargin(k);
+%     b = varargin(k+1);
+%     if strcmp(a,'E')
+%         E = b{1};
+%     elseif strcmp(a,'nu')
+%         nu = b{1};
+%     elseif strcmp(a,'G')
+%         G = b{1};        
+%     elseif strcmp(a,'d31')
+%         d31 = b{1};        
+%     elseif strcmp(a,'d33')
+%         d33 = b{1};        
+%     elseif strcmp(a,'epsr')
+%         epsr = b{1};        
+%     elseif strcmp(a,'rho')
+%         rho = b{1};        
+%     elseif strcmp(a,'s')
+%         s = b{1};
+%     elseif strcmp(a,'displayEquations')
+%         displayEquations = b{1};
+%     end
+%   end
+%   if G == 0
+%      G = E/(2*(1+nu));
+%   end
+%   %% PDE input, define eq and input;
+%   % *Reserved keywords: x,y,time,ddx,ddy,d[variable]dx,d[variable]dy*
+%   % *specify the Div operator as [ddx ddy]
+%   syms ddx ddy real;
+%   % user input begins
+%   syms u v dudx dudy dvdx dvdy real;
+%   %% material constants
+%   C11 = E/(1-nu^2);
+%   C12 = C11*nu; C21=C12;
+%   C22 = C11;
+%   C66 = G;
+%   %% Linear strain tensor
+%   epsilon11 = dudx;
+%   epsilon22 = dvdy;
+%   epsilon12 = (dudy+dvdx)/2;
+%   %% stress equations
+%   Sx = C11*epsilon11 + C12*epsilon22;
+%   Sy = C21*epsilon11 + C22*epsilon22;
+%   Txy = C66*2*epsilon12; % watch out for factor of 2 for engineering strain
+%   strainStress = [Sx;Sy;Txy];
+%   % The piezoelectric strain coefficients for PVDF
+%   % The notation of the d matrix is different from those in standard references
+%   % the "3" in dn3 below is not the z direction but is the y direction.
+%   d = [0 d31; 0 d33; 0 0];
+%   syms E1 E2 phi dphidx dphidy xi D real;
+%   E1 = -dphidx;
+%   E2 = -dphidy;
+%   C = [C11 C12 0;C12 C22 0;0 0 C66];
+%   e = C*d;
+%   pzeStress = -e*[E1;E2];
+%   stressSigma = strainStress + pzeStress; % linearized stress
+%   stress = [stressSigma(1) stressSigma(3);stressSigma(3) stressSigma(2)];
+%   permitt = eps0*epsr*eye(2); % constant stress permittivity matrix
+%   permitt = permitt - d.'*(C\d); % constant strain permittivity matrix
+%   D = (e'*[epsilon11;epsilon22;2*epsilon12] + permitt*[E1;E2]); % electric displacement equation
+%   equations = -[ddx ddy]*[stress D] + s^2*rho*[u v 0]; % the PDE
+%   if displayEquations
+%     display Problem_Equations;
+%     equations'
+%   end
+%   variables = [u v phi];
+%   end
+% 
+piezoEquations1 = @() piezoEquationsFreq('E',2e9,'nu',0.29,'G',0.775e9,'d31',2.2e-11','d33',-3e-11,'epsr',12,'s',0);
+% flip sign of d31 and d33
+piezoEquations2 = @() piezoEquationsFreq('E',2e9,'nu',0.29,'G',0.775e9,'d31',-2.2e-11','d33',3e-11,'epsr',12,'s',0);
+coeff = coeffsObject(beam, N);
+coeff.add('region','beamMaterial1','symbolicEquationFunction',piezoEquations1); % requires Symbolic Math Toolbox
+coeff.add('region','beamMaterial2','symbolicEquationFunction',piezoEquations2); % requires Symbolic Math Toolbox
+[Kmat,Mmat,Fmat] = coeff.getMatrices('u',zeros(N*numNodes,1));
+
+%% Solve
+
+% matrix form of assempde() is needed because of the global BC on the
+% electrodes
+u = assempde(Kmat,Mmat,Fmat,Qmat,Gmat,HmatComplete,RmatComplete);
+
+%% Post-process
+
+% plot potential on top surface
+uu = reshape(u(1:3*numNodes),numNodes,[]);
+phixy = beam.createXYFunctionFromNodalSolution(uu(:,3)); % x,y voltage function
+phiTop = @(x) abs(phixy(x,H/2-eps)); % top surface voltage function
+figure(1);ezplot(phiTop,[0,L-eps]); title 'voltage profile at top surface of beam for static displacement';% plot voltage on top surface
+
+%% Documentation of classes
+%%
+% See help for <matlab:doc('pdetbplus.geometryObject') geometryObject>
+% <matlab:doc('pdetbplus.lineObject') lineObject> <matlab:doc('pdetbplus.pointObject') pointObject>
+% <matlab:doc('pdetbplus.coeffsObject') coeffsObject>
+% <matlab:doc('pdetbplus.boundaryConditionObject') boundaryConditionObject>
+
+%% More info and other examples
+%%
+% <README.html See other examples>
+end
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,477 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>skinBurn</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-25"><meta name="DC.source" content="skinBurn.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Solve bioheat equation to study skin burn process</a></li><li><a href="#3">Geometry</a></li><li><a href="#4">Coefficients</a></li><li><a href="#5">Solve</a></li><li><a href="#6">Plot</a></li><li><a href="#7">Plot Damage function propagation</a></li><li><a href="#8">Documentation of classes</a></li><li><a href="#10">More info and other examples</a></li></ul></div><h2>Solve bioheat equation to study skin burn process<a name="1"></a></h2><p><b>Introduction</b></p><p><img vspace="5" hspace="5" src="skinLayer.PNG" alt=""> </p><p>Pennes' bioheat equation:</p><p><img src="skinBurn_eq77350.png" alt="$$ \rho \, C \frac{\partial T}{\partial t} = \nabla. \,k \nabla T + w_b \, \rho \, C_b $$"></p><p>Where T is the temperature and t is time, is solved on an multi-layer, 1-D skin geometry as shown in the schematic above. The other terms in the equation are described further down in the example. A skin surface temperature of 90 C is applied on the 1-D geometry converted to 2-D in space and curves relevant to the study of the burn process are generated.</p><p><b>Reference:</b> The geometry, formulation and parameters are based on the paper - "Effects of thermal properties and geometrical dimensions on skin burn injuries", S.C. Jiang, N. Ma, H.J. Li, X.X. Zhang, Elsevier Burns, 2002.</p><pre class="codeinput"><span class="keyword">function</span> skinBurn
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import package for accessing the geometryObject, boundaryConditionObject and coeffsObject classes</span>
+</pre><h2>Geometry<a name="3"></a></h2><pre class="codeinput"><span class="comment">% All units are SI. Therefore all dimensions below in m</span>
+<span class="comment">% Skin layers</span>
+epidermisH = 80e-6;
+dermisH = 0.002;
+subcutH = 0.01;
+innerTissueH = 0.03;
+<span class="comment">% Length of cross-section we consider to convert the 1-D in space problem to 2-D in space</span>
+L = 0.03/10;
+<span class="comment">% Define points of the layers</span>
+p{1} = pointObject(0,0);
+p{2} = pointObject(0,L);
+p{3} = pointObject(epidermisH,L);
+p{4} = pointObject(epidermisH,0);
+p{5} = p{3} + [dermisH,0];
+p{6} = p{4} + [dermisH,0];
+p{7} = p{5} + [subcutH,0];
+p{8} = p{6} + [subcutH,0];
+p{9} = p{7} + [innerTissueH,0];
+p{10}= p{8} + [innerTissueH,0];
+<span class="comment">% Define epidermis as a very thin layer</span>
+epidermis = geometryObject.createPolygon(<span class="string">'name'</span>,<span class="string">'epidermis'</span>,<span class="string">'points'</span>,{p{1:4}},<span class="string">'leftRegion'</span>,{<span class="string">'outer'</span>,<span class="string">'outer'</span>,<span class="string">'dermis'</span>,<span class="string">'outer'</span>},<span class="string">'rightRegion'</span>,<span class="string">'epidermis'</span>);
+<span class="comment">% Dermis</span>
+dermis = geometryObject.createPolygon(<span class="string">'name'</span>,<span class="string">'dermis'</span>,<span class="string">'points'</span>,{p{3},p{5},p{6},p{4}},<span class="string">'leftRegion'</span>,{<span class="string">'outer'</span>,<span class="string">'subcut'</span>,<span class="string">'outer'</span>},<span class="string">'rightRegion'</span>,<span class="string">'dermis'</span>,<span class="string">'leaveOpen'</span>,true);
+<span class="comment">% Subcutaneous layer</span>
+subcut = geometryObject.createPolygon(<span class="string">'name'</span>,<span class="string">'subcut'</span>,<span class="string">'points'</span>,{p{5},p{7},p{8},p{6}},<span class="string">'leftRegion'</span>,{<span class="string">'outer'</span>,<span class="string">'innerTissue'</span>,<span class="string">'outer'</span>},<span class="string">'rightRegion'</span>,<span class="string">'subcut'</span>,<span class="string">'leaveOpen'</span>,true);
+<span class="comment">% Inner tissue</span>
+innerTissue = geometryObject.createPolygon(<span class="string">'name'</span>,<span class="string">'innerTissue'</span>,<span class="string">'points'</span>,{p{7},p{9},p{10},p{8}},<span class="string">'leftRegion'</span>,{<span class="string">'outer'</span>,<span class="string">'outer'</span>,<span class="string">'outer'</span>},<span class="string">'rightRegion'</span>,<span class="string">'innerTissue'</span>,<span class="string">'leaveOpen'</span>,true);
+skin = epidermis + dermis + subcut + innerTissue;
+skin.exteriorRegion = <span class="string">'outer'</span>;
+<span class="comment">% Mesh</span>
+skin = skin.initMesh(<span class="string">'showMesh'</span>,false,<span class="string">'numRefineMeshSteps'</span>,3);
+<span class="comment">% Dimension of output</span>
+N = 1;
+</pre><h2>Coefficients<a name="4"></a></h2><pre class="codeinput"><span class="comment">% Notation</span>
+<span class="comment">% rho - density</span>
+<span class="comment">% C - Specific heat</span>
+<span class="comment">% k - Thermal conductivity</span>
+<span class="comment">% wb - Blood perfusion</span>
+
+<span class="comment">% Blood parameters</span>
+rho_b = 1060;
+C_b = 3770;
+<span class="comment">% Uniform skin temperature IC</span>
+Tb = 273.15 + 34;
+<span class="comment">% Core temperature towards inside</span>
+Tc = Tb + 3;
+<span class="comment">% Instantiate coefficients object</span>
+coeffs = coeffsObject(skin,N);
+<span class="comment">% Epidermis</span>
+k_e = 0.24;
+wb_e = 0;
+C_e = 3590;
+rho_e = 1200;
+coeffs.add(<span class="string">'region'</span>,<span class="string">'epidermis'</span>,<span class="string">'dConstantValue'</span>,rho_e*C_e,<span class="keyword">...</span>
+    <span class="string">'cConstantValue'</span>,k_e,<span class="string">'aConstantValue'</span>,wb_e*rho_b*C_b,<span class="keyword">...</span>
+    <span class="string">'fConstantValue'</span>,wb_e*rho_b*C_b*Tb);
+<span class="comment">% Dermis</span>
+k_d = 0.45;
+wb_d = 0.00125;
+C_d = 3300;
+rho_d = 1200;
+coeffs.add(<span class="string">'region'</span>,<span class="string">'dermis'</span>,<span class="string">'dConstantValue'</span>,rho_d*C_d,<span class="keyword">...</span>
+    <span class="string">'cConstantValue'</span>,k_d,<span class="string">'aConstantValue'</span>,wb_d*rho_b*C_b,<span class="keyword">...</span>
+    <span class="string">'fConstantValue'</span>,wb_d*rho_b*C_b*Tb);
+<span class="comment">% Subcutaneous</span>
+k_s = 0.19;
+wb_s = 0.00125;
+C_s = 2500;
+rho_s = 1000;
+coeffs.add(<span class="string">'region'</span>,<span class="string">'subcut'</span>,<span class="string">'dConstantValue'</span>,rho_s*C_s,<span class="keyword">...</span>
+    <span class="string">'cConstantValue'</span>,k_s,<span class="string">'aConstantValue'</span>,wb_s*rho_b*C_b,<span class="keyword">...</span>
+    <span class="string">'fConstantValue'</span>,wb_s*rho_b*C_b*Tb);
+<span class="comment">% Inner Tissue</span>
+k_i = 0.5;
+wb_i = 0.00125;
+C_i = 4000;
+rho_i = 1000;
+coeffs.add(<span class="string">'region'</span>,<span class="string">'innerTissue'</span>,<span class="string">'dConstantValue'</span>,rho_i*C_i,<span class="keyword">...</span>
+    <span class="string">'cConstantValue'</span>,k_i,<span class="string">'aConstantValue'</span>,wb_i*rho_b*C_b,<span class="keyword">...</span>
+    <span class="string">'fConstantValue'</span>,wb_i*rho_b*C_b*Tb);
+</pre><h2>Solve<a name="5"></a></h2><pre class="codeinput"><span class="comment">% First, find consistent IC for all nodes by solving the static case</span>
+<span class="comment">% Instantiate boundary conditions object for static case</span>
+bcStatic = boundaryConditionObject(skin,N);
+<span class="comment">% Temperature on surface end</span>
+bcStatic.add(<span class="string">'name'</span>,epidermis.boundary{1}.name,<span class="string">'dirichlet'</span>,Tb);
+<span class="comment">% Temperature on core end</span>
+bcStatic.add(<span class="string">'name'</span>,innerTissue.boundary{2}.name,<span class="string">'dirichlet'</span>,Tc);
+[T0,p,e,t] = adaptmesh(skin.geometryFunction,bcStatic.bcFunction,coeffs.cFunction,coeffs.aFunction,coeffs.fFunction,<span class="string">'Ngen'</span>,1,<span class="string">'Mesh'</span>,skin.mesh.p,skin.mesh.e,skin.mesh.t);
+skin.mesh = meshObject(<span class="string">'p'</span>,p,<span class="string">'e'</span>,e,<span class="string">'t'</span>,t);
+<span class="comment">% Plot with adapted mesh. Epidermis layer is very thin. Therefore, zoom in if you need to see it.</span>
+skin.plot(<span class="string">'showMesh'</span>,true);
+snapnow;
+<span class="comment">% Note: T0 needs to be further adjusted for actual IC value on epidermis-outer boundary. All other</span>
+<span class="comment">% nodes have correct value.</span>
+
+<span class="comment">% Solve dynamic equation</span>
+<span class="comment">% Instantiate boundary conditions object for dynamic case</span>
+bc = boundaryConditionObject(skin,N);
+<span class="comment">% Impose 90 C on skin surface</span>
+surfaceTemp = 273.15+90;
+bc.add(<span class="string">'name'</span>,epidermis.boundary{1}.name,<span class="string">'dirichlet'</span>,surfaceTemp);
+<span class="comment">% Core temperature is still Tc</span>
+bc.add(<span class="string">'name'</span>,innerTissue.boundary{2}.name,<span class="string">'dirichlet'</span>,Tc);
+<span class="comment">% Further adjust IC for skin surface</span>
+T0(skin.getBoundaryNodes(<span class="string">'name'</span>,epidermis.boundary{1}.name)) = surfaceTemp;
+<span class="comment">% Solve so-called "parabolic" case</span>
+<span class="comment">% Times of interest</span>
+tlist = (0:0.01:20);
+T = parabolic(T0,tlist,bc.bcFunction,skin.mesh.p,skin.mesh.e,skin.mesh.t,coeffs.cFunction,coeffs.aFunction,coeffs.fFunction,coeffs.dFunction,1e-3,1e-6);
+</pre><pre class="codeoutput">Number of triangles: 15168
+Number of triangles: 15532
+
+Maximum number of refinement passes obtained.
+</pre><img vspace="5" hspace="5" src="skinBurn_01.png" alt=""> <pre class="codeoutput">70 successful steps
+0 failed attempts
+142 function evaluations
+1 partial derivatives
+17 LU decompositions
+141 solutions of linear systems
+</pre><h2>Plot<a name="6"></a></h2><pre class="codeinput"><span class="comment">% Create x,y function of solution, T</span>
+<span class="comment">% Times that need to be plotted for x in [0,5e-3]</span>
+tPlot = [0;5;10;15];
+<span class="comment">% Find corresponding indices from times in solution</span>
+[~,ix] = min((repmat(tlist,length(tPlot),1) - repmat(tPlot,1,size(tlist,2))).^2,[],2);
+<span class="comment">% Create x,y function</span>
+Txy = skin.createXYFunctionFromNodalSolution(T(:,ix));
+<span class="comment">% X values in [0,5] including layer break points</span>
+plotXVal = sort([(0:0.1:1)*epidermisH,(0+eps:0.1:5)*1e-3,dermisH+epidermisH]);
+h = plot(plotXVal*1e3,Txy(plotXVal,L/2)-273.15);
+legend(h,<span class="string">'t=0s'</span>,<span class="string">'t=5s'</span>,<span class="string">'t=10s'</span>,<span class="string">'t=15s'</span>);
+title <span class="string">'Tissue temperature variations for a surface temperature of 90 C'</span>; xlabel(<span class="string">'x in mm'</span>); ylabel(<span class="string">'Temperature in C'</span>);
+grid <span class="string">on</span>;
+snapnow;
+</pre><img vspace="5" hspace="5" src="skinBurn_02.png" alt=""> <h2>Plot Damage function propagation<a name="7"></a></h2><p>Damage Function</p><p><img src="skinBurn_eq38238.png" alt="$$\Omega(x,t) = \int_0^t P \, exp(-\frac{Ea}{R*T(x,t)}) \,dt$$"></p><pre class="codeinput">P = 3.1e98; <span class="comment">% pre-exponential factor</span>
+Ea = 6.28e5; <span class="comment">% activation energy</span>
+R = 8.314; <span class="comment">% universal gas constant</span>
+<span class="comment">% Calculate integrand values of the Damage function</span>
+damageTerms = P*exp(-Ea./(R*T));
+<span class="comment">% Perform simple Trapzoidal integration to get Damage function contributions</span>
+diffTlist = 1/2*[diff(tlist) 0] + 1/2*[0 diff(tlist)];
+damageSum = damageTerms*diag(diffTlist);
+<span class="comment">% Calculate Damage function: #nodes X #time points</span>
+damageCumulativeSum = cumsum(damageSum,2);
+<span class="comment">% Convert Damage function from nodes to (x,y); We implicitly assume that the Damage Function value</span>
+<span class="comment">% can be linearly interpolated. This, while not strictly valid, is adequate for plotting purposes.</span>
+damageCumulativeSumxy = skin.createXYFunctionFromNodalSolution(damageCumulativeSum);
+<span class="comment">% Get Damage function values corresponding to (plotXVal,L/2)</span>
+damageValues = damageCumulativeSumxy(plotXVal,L/2)';
+<span class="comment">% Compute (x,time) curves for Damage function values : Threshold value = 0.53 and Third-degree value =</span>
+<span class="comment">% 10,000.</span>
+<span class="comment">% Note: The below technique is not the most efficient way of calculating the curves.</span>
+<span class="comment">% There is an asusmption of linearly interpolating time values. While this assumption should be held up against the</span>
+<span class="comment">% integration method that is used, it is adequate for plotting purposes.</span>
+count = 0;
+<span class="keyword">for</span> damageContourValue = [0.53,10000]
+    count = count+1;
+    <span class="comment">% Curves per Damage contour value</span>
+    damageCurveTime{count} = []; damageCurveX{count} = [];
+    <span class="keyword">for</span> k = 1:size(damageValues,1)
+        <span class="comment">% Find damage values below contour value</span>
+        ix1 = find(damageValues(k,:) &lt;= damageContourValue,1);
+        <span class="comment">% Find damage values above contour value</span>
+        ix2 = find(damageValues(k,:) &gt; damageContourValue,1);
+        <span class="keyword">if</span> isempty(ix1)
+            damageCurveX{count}(end+1) = plotXVal(k);
+            <span class="comment">% Extrapolate leftwards; no need to extrapolate rightwards if ix2 is empty as this means damage level</span>
+            <span class="comment">% hasn't reached x-point.</span>
+            damageCurveTime{count}(end+1) = max(0,1/(damageValues(k,2) - damageValues(k,1))*(tlist(2)-tlist(1))*(damageContourValue-damageValues(k,1))+tlist(1));
+        <span class="keyword">elseif</span> ~isempty(ix2)
+            damageCurveX{count}(end+1) = plotXVal(k);
+            <span class="comment">% Interpolate</span>
+            damageCurveTime{count}(end+1) = 1/(damageValues(k,ix2) - damageValues(k,ix1))*(tlist(ix2)-tlist(ix1))*(damageContourValue-damageValues(k,ix1))+tlist(ix1);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+h = plot(damageCurveTime{1},damageCurveX{1}*1e3,<span class="string">'-p'</span>,damageCurveTime{2},damageCurveX{2}*1e3,<span class="string">'-p'</span>);  xlim([0 15]);
+legend(h,<span class="string">'Threshold burn'</span>,<span class="string">'Third-degree burn'</span>,<span class="string">'Location'</span>,<span class="string">'SouthEast'</span>);
+title <span class="string">'Threshold and third-degree burn distributions for a surface temperature of 90 C'</span>;
+xlabel(<span class="string">'Time in s'</span>); ylabel(<span class="string">'x in mm'</span>);
+grid <span class="string">on</span>;
+snapnow;
+</pre><img vspace="5" hspace="5" src="skinBurn_03.png" alt=""> <h2>Documentation of classes<a name="8"></a></h2><p>See help for <a href="matlab:doc('pdetbplus.geometryObject')">geometryObject</a> <a href="matlab:doc('pdetbplus.pointObject')">pointObject</a> <a href="matlab:doc('pdetbplus.coeffsObject')">coeffsObject</a> <a href="matlab:doc('pdetbplus.boundaryConditionObject')">boundaryConditionObject</a> <a href="matlab:doc('pdetbplus.meshObject')">meshObject</a></p><h2>More info and other examples<a name="10"></a></h2><p><a href="README.html">See other examples</a></p><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Solve bioheat equation to study skin burn process
+% *Introduction*
+%
+% <<skinLayer.PNG>>
+% 
+% Pennes' bioheat equation:
+%
+% $$ \rho \, C \frac{\partial T}{\partial t} = \nabla. \,k \nabla T + w_b \, \rho \, C_b $$
+%
+% Where T is the temperature and t is time, is solved on an multi-layer, 1-D skin geometry as shown in the schematic above. The
+% other terms in the equation are described further down in the example.
+% A skin surface temperature of 90 C is applied on the 1-D geometry converted to 2-D in space and curves
+% relevant to the study of the burn process are generated.
+%
+% *Reference:* The geometry, formulation and parameters are based on the paper - "Effects of thermal
+% properties and geometrical dimensions on skin burn injuries", S.C. Jiang, N. Ma, H.J. Li, X.X.
+% Zhang, Elsevier Burns, 2002.
+%
+%  
+function skinBurn
+import pdetbplus.*; % import package for accessing the geometryObject, boundaryConditionObject and coeffsObject classes
+
+%% Geometry
+
+% All units are SI. Therefore all dimensions below in m
+% Skin layers
+epidermisH = 80e-6;
+dermisH = 0.002;
+subcutH = 0.01;
+innerTissueH = 0.03;
+% Length of cross-section we consider to convert the 1-D in space problem to 2-D in space
+L = 0.03/10;
+% Define points of the layers
+p{1} = pointObject(0,0);
+p{2} = pointObject(0,L);
+p{3} = pointObject(epidermisH,L);
+p{4} = pointObject(epidermisH,0);
+p{5} = p{3} + [dermisH,0];
+p{6} = p{4} + [dermisH,0];
+p{7} = p{5} + [subcutH,0];
+p{8} = p{6} + [subcutH,0];
+p{9} = p{7} + [innerTissueH,0];
+p{10}= p{8} + [innerTissueH,0];
+% Define epidermis as a very thin layer
+epidermis = geometryObject.createPolygon('name','epidermis','points',{p{1:4}},'leftRegion',{'outer','outer','dermis','outer'},'rightRegion','epidermis');
+% Dermis
+dermis = geometryObject.createPolygon('name','dermis','points',{p{3},p{5},p{6},p{4}},'leftRegion',{'outer','subcut','outer'},'rightRegion','dermis','leaveOpen',true);
+% Subcutaneous layer
+subcut = geometryObject.createPolygon('name','subcut','points',{p{5},p{7},p{8},p{6}},'leftRegion',{'outer','innerTissue','outer'},'rightRegion','subcut','leaveOpen',true);
+% Inner tissue
+innerTissue = geometryObject.createPolygon('name','innerTissue','points',{p{7},p{9},p{10},p{8}},'leftRegion',{'outer','outer','outer'},'rightRegion','innerTissue','leaveOpen',true);
+skin = epidermis + dermis + subcut + innerTissue;
+skin.exteriorRegion = 'outer';
+% Mesh
+skin = skin.initMesh('showMesh',false,'numRefineMeshSteps',3);
+% Dimension of output
+N = 1;
+%% Coefficients
+
+% Notation
+% rho - density
+% C - Specific heat
+% k - Thermal conductivity
+% wb - Blood perfusion
+
+% Blood parameters
+rho_b = 1060;
+C_b = 3770;
+% Uniform skin temperature IC
+Tb = 273.15 + 34;
+% Core temperature towards inside
+Tc = Tb + 3;
+% Instantiate coefficients object
+coeffs = coeffsObject(skin,N);
+% Epidermis
+k_e = 0.24;
+wb_e = 0;
+C_e = 3590;
+rho_e = 1200;
+coeffs.add('region','epidermis','dConstantValue',rho_e*C_e,...
+    'cConstantValue',k_e,'aConstantValue',wb_e*rho_b*C_b,...
+    'fConstantValue',wb_e*rho_b*C_b*Tb);
+% Dermis
+k_d = 0.45;
+wb_d = 0.00125;
+C_d = 3300;
+rho_d = 1200;
+coeffs.add('region','dermis','dConstantValue',rho_d*C_d,...
+    'cConstantValue',k_d,'aConstantValue',wb_d*rho_b*C_b,...
+    'fConstantValue',wb_d*rho_b*C_b*Tb);
+% Subcutaneous
+k_s = 0.19;
+wb_s = 0.00125;
+C_s = 2500;
+rho_s = 1000;
+coeffs.add('region','subcut','dConstantValue',rho_s*C_s,...
+    'cConstantValue',k_s,'aConstantValue',wb_s*rho_b*C_b,...
+    'fConstantValue',wb_s*rho_b*C_b*Tb);
+% Inner Tissue
+k_i = 0.5;
+wb_i = 0.00125;
+C_i = 4000;
+rho_i = 1000;
+coeffs.add('region','innerTissue','dConstantValue',rho_i*C_i,...
+    'cConstantValue',k_i,'aConstantValue',wb_i*rho_b*C_b,...
+    'fConstantValue',wb_i*rho_b*C_b*Tb);
+
+%% Solve
+
+% First, find consistent IC for all nodes by solving the static case
+% Instantiate boundary conditions object for static case
+bcStatic = boundaryConditionObject(skin,N);
+% Temperature on surface end
+bcStatic.add('name',epidermis.boundary{1}.name,'dirichlet',Tb);
+% Temperature on core end
+bcStatic.add('name',innerTissue.boundary{2}.name,'dirichlet',Tc);
+[T0,p,e,t] = adaptmesh(skin.geometryFunction,bcStatic.bcFunction,coeffs.cFunction,coeffs.aFunction,coeffs.fFunction,'Ngen',1,'Mesh',skin.mesh.p,skin.mesh.e,skin.mesh.t);
+skin.mesh = meshObject('p',p,'e',e,'t',t);
+% Plot with adapted mesh. Epidermis layer is very thin. Therefore, zoom in if you need to see it.
+skin.plot('showMesh',true);
+snapnow;
+% Note: T0 needs to be further adjusted for actual IC value on epidermis-outer boundary. All other
+% nodes have correct value.
+
+% Solve dynamic equation
+% Instantiate boundary conditions object for dynamic case
+bc = boundaryConditionObject(skin,N);
+% Impose 90 C on skin surface
+surfaceTemp = 273.15+90;
+bc.add('name',epidermis.boundary{1}.name,'dirichlet',surfaceTemp);
+% Core temperature is still Tc
+bc.add('name',innerTissue.boundary{2}.name,'dirichlet',Tc);
+% Further adjust IC for skin surface
+T0(skin.getBoundaryNodes('name',epidermis.boundary{1}.name)) = surfaceTemp;
+% Solve so-called "parabolic" case
+% Times of interest
+tlist = (0:0.01:20);
+T = parabolic(T0,tlist,bc.bcFunction,skin.mesh.p,skin.mesh.e,skin.mesh.t,coeffs.cFunction,coeffs.aFunction,coeffs.fFunction,coeffs.dFunction,1e-3,1e-6);
+
+%% Plot
+
+% Create x,y function of solution, T
+% Times that need to be plotted for x in [0,5e-3] 
+tPlot = [0;5;10;15];
+% Find corresponding indices from times in solution
+[~,ix] = min((repmat(tlist,length(tPlot),1) - repmat(tPlot,1,size(tlist,2))).^2,[],2);
+% Create x,y function
+Txy = skin.createXYFunctionFromNodalSolution(T(:,ix));
+% X values in [0,5] including layer break points
+plotXVal = sort([(0:0.1:1)*epidermisH,(0+eps:0.1:5)*1e-3,dermisH+epidermisH]);
+h = plot(plotXVal*1e3,Txy(plotXVal,L/2)-273.15);
+legend(h,'t=0s','t=5s','t=10s','t=15s');
+title 'Tissue temperature variations for a surface temperature of 90 C'; xlabel('x in mm'); ylabel('Temperature in C');
+grid on;
+snapnow;
+
+%% Plot Damage function propagation
+% Damage Function
+%
+% $$\Omega(x,t) = \int_0^t P \, exp(-\frac{Ea}{R*T(x,t)}) \,dt$$
+%
+
+P = 3.1e98; % pre-exponential factor
+Ea = 6.28e5; % activation energy
+R = 8.314; % universal gas constant
+% Calculate integrand values of the Damage function
+damageTerms = P*exp(-Ea./(R*T));
+% Perform simple Trapzoidal integration to get Damage function contributions
+diffTlist = 1/2*[diff(tlist) 0] + 1/2*[0 diff(tlist)];
+damageSum = damageTerms*diag(diffTlist);
+% Calculate Damage function: #nodes X #time points
+damageCumulativeSum = cumsum(damageSum,2);
+% Convert Damage function from nodes to (x,y); We implicitly assume that the Damage Function value
+% can be linearly interpolated. This, while not strictly valid, is adequate for plotting purposes.
+damageCumulativeSumxy = skin.createXYFunctionFromNodalSolution(damageCumulativeSum);
+% Get Damage function values corresponding to (plotXVal,L/2)
+damageValues = damageCumulativeSumxy(plotXVal,L/2)';
+% Compute (x,time) curves for Damage function values : Threshold value = 0.53 and Third-degree value =
+% 10,000.
+% Note: The below technique is not the most efficient way of calculating the curves.
+% There is an asusmption of linearly interpolating time values. While this assumption should be held up against the
+% integration method that is used, it is adequate for plotting purposes. 
+count = 0;
+for damageContourValue = [0.53,10000]
+    count = count+1;
+    % Curves per Damage contour value
+    damageCurveTime{count} = []; damageCurveX{count} = [];
+    for k = 1:size(damageValues,1)
+        % Find damage values below contour value
+        ix1 = find(damageValues(k,:) <= damageContourValue,1);
+        % Find damage values above contour value
+        ix2 = find(damageValues(k,:) > damageContourValue,1);
+        if isempty(ix1)
+            damageCurveX{count}(end+1) = plotXVal(k);
+            % Extrapolate leftwards; no need to extrapolate rightwards if ix2 is empty as this means damage level
+            % hasn't reached x-point.
+            damageCurveTime{count}(end+1) = max(0,1/(damageValues(k,2) - damageValues(k,1))*(tlist(2)-tlist(1))*(damageContourValue-damageValues(k,1))+tlist(1));
+        elseif ~isempty(ix2)
+            damageCurveX{count}(end+1) = plotXVal(k);
+            % Interpolate
+            damageCurveTime{count}(end+1) = 1/(damageValues(k,ix2) - damageValues(k,ix1))*(tlist(ix2)-tlist(ix1))*(damageContourValue-damageValues(k,ix1))+tlist(ix1);
+        end
+    end
+end
+h = plot(damageCurveTime{1},damageCurveX{1}*1e3,'-p',damageCurveTime{2},damageCurveX{2}*1e3,'-p');  xlim([0 15]);
+legend(h,'Threshold burn','Third-degree burn','Location','SouthEast');
+title 'Threshold and third-degree burn distributions for a surface temperature of 90 C';
+xlabel('Time in s'); ylabel('x in mm');
+grid on;
+snapnow;
+
+%% Documentation of classes
+%%
+% See help for <matlab:doc('pdetbplus.geometryObject') geometryObject>
+% <matlab:doc('pdetbplus.pointObject') pointObject> <matlab:doc('pdetbplus.coeffsObject')
+% coeffsObject> <matlab:doc('pdetbplus.boundaryConditionObject') boundaryConditionObject>
+% <matlab:doc('pdetbplus.meshObject') meshObject>
+
+%% More info and other examples
+%%
+% <README.html See other examples>
+end
+##### SOURCE END #####
+--></body></html>

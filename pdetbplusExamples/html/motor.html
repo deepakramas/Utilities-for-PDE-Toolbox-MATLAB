@@ -1,0 +1,571 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>motor</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-23"><meta name="DC.source" content="motor.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Magnetostatic analysis of a Switched Reluctance Motor</a></li><li><a href="#3">Define parameter defaults and read in variables</a></li><li><a href="#4">Define geometry : rotor and stator</a></li><li><a href="#5">Plot geometry</a></li><li><a href="#6">Formulation dimension</a></li><li><a href="#7">Add BC</a></li><li><a href="#8">Mesh</a></li><li><a href="#9">Coefficients</a></li><li><a href="#10">Solve</a></li><li><a href="#11">Post process</a></li><li><a href="#12">Calculate torque using Maxwell stress method</a></li><li><a href="#13">Calculate co-energy</a></li><li><a href="#14">Documentation of classes</a></li><li><a href="#16">More info and other examples</a></li></ul></div><h2>Magnetostatic analysis of a Switched Reluctance Motor<a name="1"></a></h2><p><b>Introduction</b></p><p>Basic geometry from <i>Switched-Reluctance Motor Torque Characteristics: Finite-Element Analysis and Test Results G. E. Dawson, A. R. Eastham, J. Mizia, IEEE TRANSACTIONS ON INDUSTRY APPLICATIONS, VOL. IA-23, NO. 3, MAY/JUNE 1987</i></p><p><b>What does it do?</b> : The demo uses the PDE toolbox to solve the magnetostatic PDE : <img src="motor_eq14028.png" alt="$-\nabla^2 (\mu A) = J$"> (A: magnetic potential, mu : magnetic permeability and J : current density) on the geometry of a switched reluctance motor for a specified design point: airGap, relative magnetic permeability (muMetal), #winding turns, stackDepth and rotorRadius. It returns the static torque and coenergy for the design point and plots the B field. Only linear permeable material is considered for the metal part with a constant muMetal value. However, you can modify the script to specify a nonlinear permeability.</p><p><img vspace="5" hspace="5" src="motorGeometry.png" alt=""> </p><div><ul><li>There are two modes of running:</li></ul></div><pre>  1. Run motor() with the default design point or with an input design point such as motor('rotateAngle',pi/4,...).
+  2. Run motorGUI() to perform parametric analysis and plot the torque and co-energy curves. motorGUI() calls motor() per design point.</pre><p><img vspace="5" hspace="5" src="SRM.PNG" alt=""> </p><p><b>Further Instructions for motorGUI</b></p><div><ul><li>run "motorGUI.m". This launches motorGUI.fig - a GUIDE developed frontend around the function motor().</li><li>click on "Click to Update!" for performing individual point simulation based on the parametric inputs - Rotation angle, rotor radius etc</li><li>click on "Plot Torque curve" to product Torque and Coenergy curves</li></ul></div><p><i>See exampleGeometries.m</i> and <i>exampleFormulation.m</i> on how to use the GeometryObject and the other classes used in this example</p><p><b>Requirements:</b> PDE Toolbox, the package pdetbplus</p><pre class="codeinput"><span class="keyword">function</span> [rotorPart,statorPart,torque,coenergy] = motor(varargin)
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import package for accessing the geometryObject, boundary (arcObject etc), boundaryConditionObject and coeffsObject classes</span>
+</pre><h2>Define parameter defaults and read in variables<a name="3"></a></h2><pre class="codeinput">rotateAngle = pi/9; <span class="comment">% radians</span>
+rotorRadius = 58.05; <span class="comment">% mm</span>
+airGap = 0.35; <span class="comment">% mm</span>
+stackDepth = 171; <span class="comment">% in mm</span>
+murMetal = 795; <span class="comment">% low magnetic permeability</span>
+numberOfTurns = 59; <span class="comment">% number of turns in the winding</span>
+rotorPart = []; <span class="comment">% geometry part corresponding to the rotor</span>
+statorPart = []; <span class="comment">% geometry part corresponding to the stator</span>
+returnAfterPlotGeometry = false; <span class="comment">% set to true if motor() should return after just plotting geometry</span>
+showPostProcessIntegrationBoundary = false;
+figureHandle = [];
+plotFigureAxes = [];
+postProcessIntegrationBoundaryAxes = [];
+<span class="keyword">for</span> k=1:2:length(varargin)
+    a = varargin(k);
+    b = varargin(k+1);
+    <span class="keyword">if</span> strcmp(a,<span class="string">'rotateAngle'</span>)
+        rotateAngle = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'rotorRadius'</span>)
+        rotorRadius = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'rotorPart'</span>)
+        rotorPart = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'statorPart'</span>)
+        statorPart = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'airGap'</span>)
+        airGap = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'murMetal'</span>)
+        murMetal = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'numberOfTurns'</span>)
+        numberOfTurns = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'stackDepth'</span>)
+        stackDepth = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'returnAfterPlotGeometry'</span>)
+        returnAfterPlotGeometry = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'showPostProcessIntegrationBoundary'</span>)
+        showPostProcessIntegrationBoundary = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'returnAfterPlotGeometry'</span>)
+        figureHandle = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'plotFigureAxes'</span>)
+        plotFigureAxes = b{1};
+    <span class="keyword">elseif</span> strcmp(a,<span class="string">'postProcessIntegrationBoundaryAxes'</span>)
+        showPostProcessIntegrationBoundary = true;
+        postProcessIntegrationBoundaryAxes = b{1};
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% Prepare figures, axes</span>
+<span class="keyword">if</span> isempty(figureHandle)
+    figureHandle = get(0,<span class="string">'CurrentFigure'</span>);;
+<span class="keyword">end</span>
+<span class="keyword">if</span> isempty(plotFigureAxes)
+    plotFigureAxes = get(figureHandle,<span class="string">'CurrentAxes'</span>);
+<span class="keyword">else</span>
+    figure(figureHandle);
+    axes(plotFigureAxes);
+<span class="keyword">end</span>
+<span class="keyword">if</span> showPostProcessIntegrationBoundary
+    <span class="keyword">if</span> isempty(postProcessIntegrationBoundaryAxes)
+        postProcessIntegrationBoundaryFigure = figure(2);
+        postProcessIntegrationBoundaryAxes = gca;
+    <span class="keyword">else</span>
+        postProcessIntegrationBoundaryFigure = figureHandle;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Define geometry : rotor and stator<a name="4"></a></h2><pre class="codeinput">statorRadius = rotorRadius + airGap; <span class="comment">% mm</span>
+<span class="keyword">if</span> nargin &lt; 2 || isempty(rotorPart) || isempty(statorPart)
+    rotorPart = rotor(rotorRadius, <span class="string">'air'</span>); <span class="comment">% look into rotor() to see what region names are defined</span>
+    statorPart = stator(statorRadius); <span class="comment">% look into stator() to see what region names are defined</span>
+<span class="keyword">end</span>
+center = pointObject(0.0,0.0);
+rotorPartRotated = rotorPart.rotate(center,rotateAngle);
+assembly = statorPart + rotorPartRotated;
+assembly.exteriorRegion = statorPart.exteriorRegion; <span class="comment">% happens to be 'outer'</span>
+assembly = assembly.scale(1e-3); <span class="comment">% convert mm to m</span>
+stackDepth = stackDepth*1e-3; <span class="comment">% convert mm to m</span>
+</pre><h2>Plot geometry<a name="5"></a></h2><pre class="codeinput">assembly.plot();
+<span class="keyword">if</span> returnAfterPlotGeometry
+    torque = [];
+    coenergy = [];
+    <span class="keyword">return</span>;
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="motor_01.png" alt=""> <h2>Formulation dimension<a name="6"></a></h2><pre class="codeinput">outputDimension = 1;
+</pre><h2>Add BC<a name="7"></a></h2><pre class="codeinput">    <span class="keyword">function</span> [hval,rval,qval,gval] = bcond(x,y,u,t)
+        <span class="comment">% Dirichlet condition on the boundary</span>
+        rval(1) = 0;
+        hval(1) = 1;
+        qval = [];
+        gval = [];
+    <span class="keyword">end</span>
+<span class="comment">% instantiate boundaryConditionObject for convenient definition of BCs</span>
+bc = boundaryConditionObject(assembly, outputDimension);
+outsideBCRegionName = <span class="string">'nonMeshedSpace'</span>;
+insideBCRegionName = <span class="string">'outer'</span>; <span class="comment">% this region was defined in stator()</span>
+<span class="comment">% BC specified between nonMeshedSpace and outer (the outermost annulus)</span>
+bc.add(<span class="string">'outerRegion'</span>,outsideBCRegionName,<span class="string">'innerRegion'</span>,insideBCRegionName,<span class="string">'xyutFunction'</span>,@bcond);
+</pre><h2>Mesh<a name="8"></a></h2><pre class="codeinput">assembly = assembly.initMesh(<span class="string">'showMesh'</span>,false);
+showRegion = false;
+<span class="keyword">if</span> showRegion
+    <span class="comment">% plot individual regions; Note: because of limitation in plot() should</span>
+    <span class="comment">% be called after meshing</span>
+    <span class="keyword">for</span> k=1:length(assembly.regions)
+        figure(k);
+        assembly.plotRegion(assembly.regions{k});
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Coefficients<a name="9"></a></h2><p>current Density, J = 10 Amps <b>X</b> number of turns / windingArea</p><pre class="codeinput">windingArea = assembly.getRegionArea(<span class="string">'winding1'</span>); <span class="comment">% winding1 area equal to other winding areas.</span>
+currentDensity = -10*numberOfTurns/windingArea;
+fcoeffMOne = @(x,y,u,ux,uy,time) currentDensity;
+fcoeffOne = @(x,y,u,ux,uy,time)  -currentDensity;
+<span class="comment">% instantiate coeffsObject for convenient definition of coefficients</span>
+coeff = coeffsObject(assembly, outputDimension);
+<span class="comment">% use linear permeable materials</span>
+murel = 4*pi*1e-7; <span class="comment">% magnetic permeability of free space</span>
+cfreespace = 1/murel;
+cmetal = 1/(murMetal*murel);
+    <span class="keyword">function</span> c = ccoeffMetal(x,y,u,ux,uy,time)
+        c = [cmetal 0;0 cmetal];
+    <span class="keyword">end</span>
+<span class="comment">% specify ccoeffMetal() for regions where it is valid; regions referred below were defined in rotor() and stator()</span>
+coeff.add(<span class="string">'region'</span>,<span class="string">'rotor'</span>,<span class="string">'cijFunction'</span>,@ccoeffMetal);
+coeff.add(<span class="string">'region'</span>,<span class="string">'stator'</span>,<span class="string">'cijFunction'</span>,@ccoeffMetal);
+coeff.add(<span class="string">'region'</span>,<span class="string">'core'</span>,<span class="string">'cijFunction'</span>,@ccoeffMetal);
+    <span class="keyword">function</span> c = ccoeffFreeSpace(x,y,u,ux,uy,time)
+        c = [cfreespace 0;0 cfreespace];
+    <span class="keyword">end</span>
+<span class="comment">% free space coefficient for the other regions</span>
+coeff.add(<span class="string">'region'</span>,<span class="string">'winding1'</span>,<span class="string">'fiFunction'</span>,fcoeffMOne,<span class="string">'cijFunction'</span>,@ccoeffFreeSpace);
+coeff.add(<span class="string">'region'</span>,<span class="string">'winding2'</span>,<span class="string">'fiFunction'</span>,fcoeffOne,<span class="string">'cijFunction'</span>,@ccoeffFreeSpace);
+coeff.add(<span class="string">'region'</span>,<span class="string">'winding3'</span>,<span class="string">'fiFunction'</span>,fcoeffOne,<span class="string">'cijFunction'</span>,@ccoeffFreeSpace);
+coeff.add(<span class="string">'region'</span>,<span class="string">'winding4'</span>,<span class="string">'fiFunction'</span>,fcoeffMOne,<span class="string">'cijFunction'</span>,@ccoeffFreeSpace);
+coeff.add(<span class="string">'region'</span>,<span class="string">'air'</span>,<span class="string">'cijFunction'</span>,@ccoeffFreeSpace);
+coeff.add(<span class="string">'region'</span>,<span class="string">'outer'</span>,<span class="string">'cijFunction'</span>,@ccoeffFreeSpace);
+</pre><h2>Solve<a name="10"></a></h2><pre class="codeinput">a = 0; <span class="comment">% magnetostatic problem</span>
+numAdaptivePasses = 5;
+[A,p,e,t] = adaptmesh(assembly.geometryFunction, bc.bcFunction,coeff.cFunction,a,coeff.fFunction,<span class="string">'Ngen'</span>,numAdaptivePasses);
+<span class="comment">% reset mesh object since adaptmesh changes mesh size</span>
+assembly.mesh = meshObject(<span class="string">'p'</span>,p,<span class="string">'e'</span>,e,<span class="string">'t'</span>,t);
+</pre><pre class="codeoutput">Number of triangles: 8910
+Number of triangles: 8954
+Number of triangles: 9134
+Number of triangles: 9174
+Number of triangles: 9458
+Number of triangles: 9526
+
+Maximum number of refinement passes obtained.
+</pre><h2>Post process<a name="11"></a></h2><p>calculate <img src="motor_eq46414.png" alt="$B = \nabla \times A$"></p><pre class="codeinput">[dAdx,dAdy] = pdegrad(assembly.mesh.p,assembly.mesh.t,A);
+Bx = dAdy;
+By = -dAdx;
+hold <span class="string">on</span>;
+pdeplot(assembly.mesh.p, assembly.mesh.e, assembly.mesh.t, <span class="string">'xydata'</span>, A, <span class="string">'contour'</span>,<span class="string">'off'</span>,<span class="string">'colorbar'</span>,<span class="string">'on'</span>,<span class="string">'mesh'</span>,<span class="string">'off'</span>,<span class="string">'flowdata'</span>,[Bx;By]); axis <span class="string">equal</span>;
+</pre><img vspace="5" hspace="5" src="motor_02.png" alt=""> <h2>Calculate torque using Maxwell stress method<a name="12"></a></h2><p>Magnetic field intensity <img src="motor_eq73462.png" alt="$H = \mu B$">; but we calculate H from pdecgrad() for convenience</p><pre class="codeinput">[cdAdx,cdAdy] = pdecgrad(assembly.mesh.p,assembly.mesh.t,@coeff.cFunction,A);
+Hx = cdAdy;
+Hy = -cdAdx;
+    <span class="keyword">function</span> dT = differentialTorque(xmid,ymid,nxmid,nymid,inputs)
+        bx = inputs{1};
+        by = inputs{2};
+        hx = inputs{3};
+        hy = inputs{4};
+        <span class="comment">% dT = (position X H)(n.B) + (position X B)(n.H) - (position X n)(H.B)</span>
+        dT3 = 0.5*((xmid*hy-ymid*hx)*(nxmid*bx+nymid*by) + (xmid*by-ymid*bx)*(nxmid*hx+nymid*hy) - (xmid*nymid-ymid*nxmid)*(bx*hx+by*hy));
+        dT = [0 0 dT3]';
+    <span class="keyword">end</span>
+<span class="keyword">if</span> nargout &gt; 1
+    <span class="keyword">if</span> showPostProcessIntegrationBoundary
+        figure(postProcessIntegrationBoundaryFigure);
+        axes(postProcessIntegrationBoundaryAxes);
+    <span class="keyword">end</span>
+    <span class="comment">% integrate torque differential dT over air-rotor boundary but still on</span>
+    <span class="comment">% the air side</span>
+    torque = assembly.integrateOutsideBoundary(<span class="string">'innerRegion'</span>,<span class="string">'rotor'</span>,<span class="string">'outerRegion'</span>,<span class="string">'air'</span>,<span class="string">'integrand'</span>,@differentialTorque,<span class="string">'showBoundary'</span>,showPostProcessIntegrationBoundary,Bx,By,Hx,Hy)*stackDepth;
+    axes(plotFigureAxes);
+<span class="keyword">else</span>
+    torque = [];
+<span class="keyword">end</span>
+</pre><h2>Calculate co-energy<a name="13"></a></h2><pre class="codeinput">    <span class="keyword">function</span> dC = differentialCoenergyPart1a(xmid,ymid,inputs)
+        <span class="comment">% avector = [0 0 inputs{1}];</span>
+        <span class="comment">% J = [0 0 currentDensity];</span>
+        <span class="comment">% dC = dot(avector,J);</span>
+        dC = inputs{1}*currentDensity;
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> dC = differentialCoenergyPart1b(xmid,ymid,inputs)
+        <span class="comment">% avector = [0 0 inputs{1}];</span>
+        <span class="comment">% J = [0 0 -currentDensity];</span>
+        <span class="comment">% dC = dot(avector,J);</span>
+        dC = inputs{1}*(-currentDensity);
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> dC = differentialCoenergyPart2(xmid,ymid,inputs)
+        bx = inputs{1};
+        by = inputs{2};
+        hx = inputs{3};
+        hy = inputs{4};
+        <span class="comment">% dC = 0.5*dot(B,H);</span>
+        dC = 0.5*(bx*hx+by*hy);
+    <span class="keyword">end</span>
+<span class="comment">% interpolate A from mesh vertices to centroids of mesh elements</span>
+Atriangles = pdeintrp(assembly.mesh.p,assembly.mesh.t,A);
+<span class="comment">% integrate differentialCoenergyPart1a/b() over the windings (where</span>
+<span class="comment">% the current density contribution exists)</span>
+coenergy1 = assembly.integrateOverRegion(<span class="string">'integrand'</span>,@differentialCoenergyPart1a,<span class="string">'region'</span>,<span class="string">'winding1'</span>,<span class="string">'integrandInput'</span>,{Atriangles});
+coenergy1 = assembly.integrateOverRegion(<span class="string">'integrand'</span>,@differentialCoenergyPart1b,<span class="string">'region'</span>,<span class="string">'winding2'</span>,<span class="string">'integrandInput'</span>,{Atriangles}) + coenergy1;
+coenergy1 = assembly.integrateOverRegion(<span class="string">'integrand'</span>,@differentialCoenergyPart1a,<span class="string">'region'</span>,<span class="string">'winding4'</span>,<span class="string">'integrandInput'</span>,{Atriangles}) + coenergy1;
+coenergy1 = assembly.integrateOverRegion(<span class="string">'integrand'</span>,@differentialCoenergyPart1b,<span class="string">'region'</span>,<span class="string">'winding3'</span>,<span class="string">'integrandInput'</span>,{Atriangles}) + coenergy1;
+coenergy1 = coenergy1*stackDepth;
+<span class="comment">% integrate differentialCoenergyPart2() over all regions</span>
+coenergy2 = 0;
+<span class="keyword">for</span> k=1:length(assembly.regions)
+    coenergy2 = assembly.integrateOverRegion(<span class="string">'integrand'</span>,@differentialCoenergyPart2,<span class="string">'region'</span>,assembly.regions{k},<span class="string">'integrandInput'</span>,{Bx,By,Hx,Hy}) + coenergy2;
+<span class="keyword">end</span>
+coenergy2 = coenergy2 * stackDepth;
+coenergy = coenergy1 - coenergy2;
+</pre><h2>Documentation of classes<a name="14"></a></h2><p>See help for <a href="matlab:doc('pdetbplus.geometryObject')">geometryObject</a> <a href="matlab:doc('pdetbplus.lineObject')">lineObject</a> <a href="matlab:doc('pdetbplus.arcObject')">arcObject</a> <a href="matlab:doc('pdetbplus.pointObject')">pointObject</a> <a href="matlab:doc('pdetbplus.coeffsObject')">coeffsObject</a> <a href="matlab:doc('pdetbplus.boundaryConditionObject')">boundaryConditionObject</a> <a href="matlab:doc('pdetbplus.meshObject')">meshObject</a></p><h2>More info and other examples<a name="16"></a></h2><p><a href="README.html">See other examples</a></p><pre class="codeinput"><span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  pdetbplus.geometryObject
+  Package: pdetbplus
+
+  Properties:
+                name: 'rotor'
+      exteriorRegion: 'air'
+                mesh: [1x1 pdetbplus.meshObject]
+            boundary: {1x36 cell}
+             regions: {'air'  'core'  'rotor'}
+    geometryFunction: @(varargin)self.geometryFunction_impl(varargin{:})
+          regionToId: [3x1 containers.Map]
+
+
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Magnetostatic analysis of a Switched Reluctance Motor
+% *Introduction*
+%
+% Basic geometry from
+% _Switched-Reluctance Motor Torque Characteristics:
+% Finite-Element Analysis and Test Results
+% G. E. Dawson, A. R. Eastham, J. Mizia,
+% IEEE TRANSACTIONS ON INDUSTRY APPLICATIONS, VOL. IA-23, NO. 3, MAY/JUNE 1987_
+%
+% *What does it do?* : The demo uses the PDE toolbox to solve the magnetostatic PDE : $-\nabla^2 (\mu A) = J$ (A: magnetic potential, mu : magnetic permeability and J : current density) on the geometry of
+% a switched reluctance motor for a specified design point: airGap, relative magnetic permeability (muMetal), #winding turns,
+% stackDepth and rotorRadius. It returns the static torque and coenergy for
+% the design point and plots the B field. Only linear permeable material is
+% considered for the metal part with a constant muMetal value. However, you can modify the script to specify a
+% nonlinear permeability.
+%
+% 
+% <<motorGeometry.png>>
+% 
+% * There are two modes of running:
+% 
+%    1. Run motor() with the default design point or with an input design point such as motor('rotateAngle',pi/4,...).
+%    2. Run motorGUI() to perform parametric analysis and plot the torque and co-energy curves. motorGUI() calls motor() per design point.
+% 
+% 
+% <<SRM.PNG>>
+% 
+% *Further Instructions for motorGUI*
+% 
+% * run "motorGUI.m". This launches motorGUI.fig - a GUIDE developed frontend around the function motor().
+% * click on "Click to Update!" for performing individual point simulation based on the parametric inputs - Rotation angle, rotor radius etc
+% * click on "Plot Torque curve" to product Torque and Coenergy curves
+%
+% _See exampleGeometries.m_ and _exampleFormulation.m_ on how to use the
+% GeometryObject and the other classes used in this example
+% 
+% *Requirements:* PDE Toolbox, the package pdetbplus
+%
+%  
+function [rotorPart,statorPart,torque,coenergy] = motor(varargin)
+import pdetbplus.*; % import package for accessing the geometryObject, boundary (arcObject etc), boundaryConditionObject and coeffsObject classes
+%% Define parameter defaults and read in variables
+rotateAngle = pi/9; % radians
+rotorRadius = 58.05; % mm
+airGap = 0.35; % mm
+stackDepth = 171; % in mm
+murMetal = 795; % low magnetic permeability
+numberOfTurns = 59; % number of turns in the winding
+rotorPart = []; % geometry part corresponding to the rotor
+statorPart = []; % geometry part corresponding to the stator
+returnAfterPlotGeometry = false; % set to true if motor() should return after just plotting geometry
+showPostProcessIntegrationBoundary = false;
+figureHandle = [];
+plotFigureAxes = [];
+postProcessIntegrationBoundaryAxes = [];
+for k=1:2:length(varargin)
+    a = varargin(k);
+    b = varargin(k+1);
+    if strcmp(a,'rotateAngle')
+        rotateAngle = b{1};
+    elseif strcmp(a,'rotorRadius')
+        rotorRadius = b{1};      
+    elseif strcmp(a,'rotorPart')
+        rotorPart = b{1};
+    elseif strcmp(a,'statorPart')
+        statorPart = b{1};
+    elseif strcmp(a,'airGap')
+        airGap = b{1};
+    elseif strcmp(a,'murMetal')
+        murMetal = b{1};       
+    elseif strcmp(a,'numberOfTurns')
+        numberOfTurns = b{1};
+    elseif strcmp(a,'stackDepth')
+        stackDepth = b{1};     
+    elseif strcmp(a,'returnAfterPlotGeometry')
+        returnAfterPlotGeometry = b{1};
+    elseif strcmp(a,'showPostProcessIntegrationBoundary')
+        showPostProcessIntegrationBoundary = b{1};
+    elseif strcmp(a,'returnAfterPlotGeometry')
+        figureHandle = b{1};
+    elseif strcmp(a,'plotFigureAxes')
+        plotFigureAxes = b{1};
+    elseif strcmp(a,'postProcessIntegrationBoundaryAxes')
+        showPostProcessIntegrationBoundary = true;
+        postProcessIntegrationBoundaryAxes = b{1};
+    end   
+end
+% Prepare figures, axes
+if isempty(figureHandle)
+    figureHandle = get(0,'CurrentFigure');;
+end
+if isempty(plotFigureAxes)
+    plotFigureAxes = get(figureHandle,'CurrentAxes');
+else
+    figure(figureHandle);
+    axes(plotFigureAxes);
+end
+if showPostProcessIntegrationBoundary
+    if isempty(postProcessIntegrationBoundaryAxes)
+        postProcessIntegrationBoundaryFigure = figure(2);
+        postProcessIntegrationBoundaryAxes = gca;
+    else
+        postProcessIntegrationBoundaryFigure = figureHandle;
+    end
+end
+
+%% Define geometry : rotor and stator
+statorRadius = rotorRadius + airGap; % mm
+if nargin < 2 || isempty(rotorPart) || isempty(statorPart)
+    rotorPart = rotor(rotorRadius, 'air'); % look into rotor() to see what region names are defined
+    statorPart = stator(statorRadius); % look into stator() to see what region names are defined
+end
+center = pointObject(0.0,0.0);
+rotorPartRotated = rotorPart.rotate(center,rotateAngle);
+assembly = statorPart + rotorPartRotated;
+assembly.exteriorRegion = statorPart.exteriorRegion; % happens to be 'outer'
+assembly = assembly.scale(1e-3); % convert mm to m
+stackDepth = stackDepth*1e-3; % convert mm to m
+%% Plot geometry
+assembly.plot();
+if returnAfterPlotGeometry
+    torque = [];
+    coenergy = [];
+    return;
+end
+%% Formulation dimension
+outputDimension = 1;
+%% Add BC
+    function [hval,rval,qval,gval] = bcond(x,y,u,t)
+        % Dirichlet condition on the boundary
+        rval(1) = 0;
+        hval(1) = 1;
+        qval = [];
+        gval = [];
+    end
+% instantiate boundaryConditionObject for convenient definition of BCs
+bc = boundaryConditionObject(assembly, outputDimension);
+outsideBCRegionName = 'nonMeshedSpace';
+insideBCRegionName = 'outer'; % this region was defined in stator()
+% BC specified between nonMeshedSpace and outer (the outermost annulus)
+bc.add('outerRegion',outsideBCRegionName,'innerRegion',insideBCRegionName,'xyutFunction',@bcond);
+%% Mesh
+assembly = assembly.initMesh('showMesh',false);
+showRegion = false;
+if showRegion
+    % plot individual regions; Note: because of limitation in plot() should
+    % be called after meshing
+    for k=1:length(assembly.regions)
+        figure(k);
+        assembly.plotRegion(assembly.regions{k});
+    end
+end
+%% Coefficients
+% current Density, J = 10 Amps *X* number of turns / windingArea
+windingArea = assembly.getRegionArea('winding1'); % winding1 area equal to other winding areas.
+currentDensity = -10*numberOfTurns/windingArea;
+fcoeffMOne = @(x,y,u,ux,uy,time) currentDensity;
+fcoeffOne = @(x,y,u,ux,uy,time)  -currentDensity;
+% instantiate coeffsObject for convenient definition of coefficients
+coeff = coeffsObject(assembly, outputDimension);
+% use linear permeable materials
+murel = 4*pi*1e-7; % magnetic permeability of free space
+cfreespace = 1/murel;
+cmetal = 1/(murMetal*murel);
+    function c = ccoeffMetal(x,y,u,ux,uy,time)
+        c = [cmetal 0;0 cmetal];
+    end
+% specify ccoeffMetal() for regions where it is valid; regions referred below were defined in rotor() and stator()
+coeff.add('region','rotor','cijFunction',@ccoeffMetal);
+coeff.add('region','stator','cijFunction',@ccoeffMetal);
+coeff.add('region','core','cijFunction',@ccoeffMetal);
+    function c = ccoeffFreeSpace(x,y,u,ux,uy,time)
+        c = [cfreespace 0;0 cfreespace];
+    end
+% free space coefficient for the other regions
+coeff.add('region','winding1','fiFunction',fcoeffMOne,'cijFunction',@ccoeffFreeSpace);
+coeff.add('region','winding2','fiFunction',fcoeffOne,'cijFunction',@ccoeffFreeSpace);
+coeff.add('region','winding3','fiFunction',fcoeffOne,'cijFunction',@ccoeffFreeSpace);
+coeff.add('region','winding4','fiFunction',fcoeffMOne,'cijFunction',@ccoeffFreeSpace);
+coeff.add('region','air','cijFunction',@ccoeffFreeSpace);
+coeff.add('region','outer','cijFunction',@ccoeffFreeSpace);
+
+%% Solve
+a = 0; % magnetostatic problem
+numAdaptivePasses = 5;
+[A,p,e,t] = adaptmesh(assembly.geometryFunction, bc.bcFunction,coeff.cFunction,a,coeff.fFunction,'Ngen',numAdaptivePasses);
+% reset mesh object since adaptmesh changes mesh size
+assembly.mesh = meshObject('p',p,'e',e,'t',t);
+%% Post process
+% calculate $B = \nabla \times A$
+[dAdx,dAdy] = pdegrad(assembly.mesh.p,assembly.mesh.t,A); 
+Bx = dAdy;
+By = -dAdx;
+hold on;
+pdeplot(assembly.mesh.p, assembly.mesh.e, assembly.mesh.t, 'xydata', A, 'contour','off','colorbar','on','mesh','off','flowdata',[Bx;By]); axis equal;
+%% Calculate torque using Maxwell stress method
+% Magnetic field intensity $H = \mu B$; but we calculate H from pdecgrad() for
+% convenience
+[cdAdx,cdAdy] = pdecgrad(assembly.mesh.p,assembly.mesh.t,@coeff.cFunction,A);
+Hx = cdAdy;
+Hy = -cdAdx;
+    function dT = differentialTorque(xmid,ymid,nxmid,nymid,inputs)
+        bx = inputs{1};
+        by = inputs{2};
+        hx = inputs{3};
+        hy = inputs{4};
+        % dT = (position X H)(n.B) + (position X B)(n.H) - (position X n)(H.B)
+        dT3 = 0.5*((xmid*hy-ymid*hx)*(nxmid*bx+nymid*by) + (xmid*by-ymid*bx)*(nxmid*hx+nymid*hy) - (xmid*nymid-ymid*nxmid)*(bx*hx+by*hy));
+        dT = [0 0 dT3]';
+    end
+if nargout > 1
+    if showPostProcessIntegrationBoundary
+        figure(postProcessIntegrationBoundaryFigure);
+        axes(postProcessIntegrationBoundaryAxes);
+    end
+    % integrate torque differential dT over air-rotor boundary but still on
+    % the air side
+    torque = assembly.integrateOutsideBoundary('innerRegion','rotor','outerRegion','air','integrand',@differentialTorque,'showBoundary',showPostProcessIntegrationBoundary,Bx,By,Hx,Hy)*stackDepth;
+    axes(plotFigureAxes);
+else
+    torque = [];
+end
+%% Calculate co-energy
+    function dC = differentialCoenergyPart1a(xmid,ymid,inputs)
+        % avector = [0 0 inputs{1}];
+        % J = [0 0 currentDensity];
+        % dC = dot(avector,J);
+        dC = inputs{1}*currentDensity;
+    end
+    function dC = differentialCoenergyPart1b(xmid,ymid,inputs)
+        % avector = [0 0 inputs{1}];
+        % J = [0 0 -currentDensity];
+        % dC = dot(avector,J);
+        dC = inputs{1}*(-currentDensity);
+    end
+    function dC = differentialCoenergyPart2(xmid,ymid,inputs)
+        bx = inputs{1};
+        by = inputs{2};
+        hx = inputs{3};
+        hy = inputs{4};
+        % dC = 0.5*dot(B,H);
+        dC = 0.5*(bx*hx+by*hy);
+    end
+% interpolate A from mesh vertices to centroids of mesh elements
+Atriangles = pdeintrp(assembly.mesh.p,assembly.mesh.t,A);
+% integrate differentialCoenergyPart1a/b() over the windings (where
+% the current density contribution exists)
+coenergy1 = assembly.integrateOverRegion('integrand',@differentialCoenergyPart1a,'region','winding1','integrandInput',{Atriangles});
+coenergy1 = assembly.integrateOverRegion('integrand',@differentialCoenergyPart1b,'region','winding2','integrandInput',{Atriangles}) + coenergy1;
+coenergy1 = assembly.integrateOverRegion('integrand',@differentialCoenergyPart1a,'region','winding4','integrandInput',{Atriangles}) + coenergy1;
+coenergy1 = assembly.integrateOverRegion('integrand',@differentialCoenergyPart1b,'region','winding3','integrandInput',{Atriangles}) + coenergy1;
+coenergy1 = coenergy1*stackDepth;
+% integrate differentialCoenergyPart2() over all regions
+coenergy2 = 0;
+for k=1:length(assembly.regions)
+    coenergy2 = assembly.integrateOverRegion('integrand',@differentialCoenergyPart2,'region',assembly.regions{k},'integrandInput',{Bx,By,Hx,Hy}) + coenergy2;
+end
+coenergy2 = coenergy2 * stackDepth;
+coenergy = coenergy1 - coenergy2;
+
+%% Documentation of classes
+%%
+% See help for <matlab:doc('pdetbplus.geometryObject') geometryObject>
+% <matlab:doc('pdetbplus.lineObject') lineObject> <matlab:doc('pdetbplus.arcObject') arcObject>
+% <matlab:doc('pdetbplus.pointObject') pointObject> <matlab:doc('pdetbplus.coeffsObject')
+% coeffsObject> <matlab:doc('pdetbplus.boundaryConditionObject') boundaryConditionObject> <matlab:doc('pdetbplus.meshObject') meshObject>
+
+%% More info and other examples
+%%
+% <README.html See other examples>
+end
+##### SOURCE END #####
+--></body></html>
