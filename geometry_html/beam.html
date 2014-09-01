@@ -1,0 +1,346 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>beam</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-09-21"><meta name="DC.source" content="beam.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#4">PDE input, define eq and input;</a></li><li><a href="#6">geometry</a></li><li><a href="#7">boundary conditions</a></li><li><a href="#8">coefficients</a></li><li><a href="#9">solve</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [] = beam()
+</pre><pre class="codeinput"><span class="comment">%[uxy,vxy,phixy] = piezoExample;</span>
+import <span class="string">pdetbplus.*</span>;
+</pre><pre class="codeinput">    <span class="keyword">function</span> [equations,variables] = elasticitySymbolicFunction()
+</pre><h2>PDE input, define eq and input;<a name="4"></a></h2><p>Reserved keywords: ddx,ddy,d[variable]dx,d[variable]dy specify the Div Grad operator "grad." as ddx*, ddy*</p><pre class="codeinput">        syms <span class="string">ddx</span> <span class="string">ddy</span> <span class="string">real</span>;
+        <span class="comment">% user input begins</span>
+        syms <span class="string">E</span> <span class="string">nu</span> <span class="string">real</span>;
+        syms <span class="string">u</span> <span class="string">v</span> <span class="string">dudx</span> <span class="string">dudy</span> <span class="string">dvdx</span> <span class="string">dvdy</span> <span class="string">real</span>;
+
+        <span class="comment">% material constants</span>
+        G = E/(1-nu^2);
+        C11 = G;
+        C12 = G*nu;
+        C22 = G;
+        C33 = G*(1-nu)/2;
+
+        <span class="comment">% deformation gradient</span>
+        F = sym(eye(2)) + [dudx dudy;dvdx dvdy];
+        <span class="comment">% Green-Lagrange strain tensor</span>
+        strainTensor =  1/2*expand(F.'*F - sym(eye(2)));
+
+        ex = strainTensor(1,1);
+        ey = strainTensor(2,2);
+        gxy = 2*strainTensor(1,2); <span class="comment">% same as 2*E(2,1); "2" for engineering strain</span>
+
+        Sx = C11*ex + C12*ey;
+        Sy = C12*ex + C22*ey;
+        Txy = C33*gxy;
+        equations = [ddx ddy]*[Sx Txy; Txy Sy] - [1 0];
+        display <span class="string">Problem_Equations</span>;
+        pretty(equations');
+        <span class="comment">% plug in values</span>
+        equations = subs(equations,{E,nu},[2e9,0.29]);
+        display <span class="string">Equations_with_values</span>
+        pretty(equations');
+        variables = [u v];
+</pre><pre class="codeoutput">Error using assignin
+Attempt to add "ddx" to a static workspace.
+ See &lt;a href="matlab: helpview([docroot '/techdoc/matlab_prog/matlab_prog.map'],'adding_variables_dynamically')"&gt;MATLAB Programming, Restrictions on Assigning to Variables&lt;/a&gt; for details.
+
+Error in syms (line 64)
+        assignin('caller',x,sym(x,control));
+
+Error in beam/elasticitySymbolicFunction (line 9)
+        syms ddx ddy real;
+
+Error in pdetbplus.coeffsObject/addCoeff (line 108)
+                [equations,variables] = self.coeff{end}.symbolicEquationFunction();
+
+Error in beam (line 90)
+coeff = coeff.addCoeff('region','beamMaterial','symbolicEquationFunction',@elasticitySymbolicFunction);
+</pre><pre class="codeinput">    <span class="keyword">end</span>
+</pre><h2>geometry<a name="6"></a></h2><pre class="codeinput">L = 100e-3;
+H = 1e-3;
+p{1} = pointObject(0,0);
+p{2} = p{1} + [0,H];
+p{3} = p{2} + [L,0];
+p{4} = p{3} - [0,H];
+a{1} = lineObject(<span class="string">'wall'</span>,p{1},p{2});
+a{2} = lineObject(<span class="string">'top'</span>,p{2},p{3});
+a{3} = lineObject(<span class="string">'free'</span>,p{3},p{4});
+a{4} = lineObject(<span class="string">'bottom'</span>,p{4},p{1});
+<span class="keyword">for</span> kk=1:length(a)
+    a{kk}.leftRegion = <span class="string">'nonMeshedSpace'</span>;
+    a{kk}.rightRegion = <span class="string">'beamMaterial'</span>;
+<span class="keyword">end</span>
+beam = geometryObject(<span class="string">'beam'</span>,a);
+beam.exteriorRegion = <span class="string">'nonMeshedSpace'</span>;
+beam.plot();
+beam = beam.initMesh(<span class="string">'showMesh'</span>,true,<span class="string">'Hmax'</span>,H/5); axis(<span class="string">'equal'</span>);
+</pre><pre class="codeoutput">
+warning: Approximately 5000 triangles will be generated.
+</pre><img vspace="5" hspace="5" src="beam_01.png" alt=""> <h2>boundary conditions<a name="7"></a></h2><pre class="codeinput">N = 2; <span class="comment">% output dimension</span>
+stepNumber = 1;
+numDeflectionSteps = 3;
+<span class="comment">% instantiate boundaryConditionObject for convenient definition of BCs</span>
+bc = boundaryConditionObject(beam, N);
+    <span class="keyword">function</span> [hval,rval,qval,gval] = bcondWall(x,y,u,t)
+        <span class="comment">% Dirichlet condition on the boundary</span>
+        rval = zeros(N,1);
+        hval = speye(N);
+        qval = sparse(N,N);
+        gval = sparse(N,1);
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = bcondFree(x,y,u,t)
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        qval = sparse(N,N);
+        gval(1) = 0;
+        gval(2) = stepNumber/numDeflectionSteps*5/H;
+    <span class="keyword">end</span>
+<span class="keyword">for</span> k=1:length(a)
+    <span class="keyword">if</span> strfind(a{k}.name,<span class="string">'wall'</span>)
+        bc = bc.addBC(<span class="string">'name'</span>,a{k}.name,<span class="string">'xyutFunction'</span>,@bcondWall);
+    <span class="keyword">elseif</span> strfind(a{k}.name,<span class="string">'free'</span>)
+        bc = bc.addBC(<span class="string">'name'</span>,a{k}.name,<span class="string">'xyutFunction'</span>,@bcondFree);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>coefficients<a name="8"></a></h2><pre class="codeinput">coeff = coeffsObject(beam, N);
+coeff = coeff.addCoeff(<span class="string">'region'</span>,<span class="string">'beamMaterial'</span>,<span class="string">'symbolicEquationFunction'</span>,@elasticitySymbolicFunction);
+</pre><h2>solve<a name="9"></a></h2><pre class="codeinput">a = 0; <span class="comment">% magnetostatic problem</span>
+numNodes = size(beam.mesh.p,2);
+freeNodes = beam.getBoundaryNodes(<span class="string">'name'</span>,<span class="string">'free'</span>);
+[~,topRightCornerIndex] = max(beam.mesh.p(2,freeNodes));
+usePdenonlin = true;
+<span class="keyword">if</span> usePdenonlin
+    u = zeros(N*numNodes,1); <span class="comment">%initial guess</span>
+    <span class="keyword">for</span> stepNumber=1:numDeflectionSteps
+        <span class="comment">%u=pdenonlin(@bc.bcFunction,beam.mesh.p,beam.mesh.e,beam.mesh.t,@coeff.cFunction,a,[0 0]','Report','on','Jacobian','full','U0',u);</span>
+        u=assempde(@bc.bcFunction,beam.mesh.p,beam.mesh.e,beam.mesh.t,@coeff.cFunction,a,[0 0]');
+    <span class="keyword">end</span>
+    uu = reshape(u,numNodes,[]);
+    beam.mesh.p(1:2,:) = beam.mesh.p(1:2,:) + uu(:,1:2)';
+<span class="keyword">else</span>
+    <span class="comment">% add additional constraints</span>
+    Hadd = sparse(0,0);
+    Radd = [];
+    uoGeometry = beam.mesh.p(1:2,:)';
+    uoGeometry = uoGeometry(:);
+    [~,~,Hmat,R] = bc.getMatrices(<span class="string">'solution'</span>,zeros(N*numNodes,1));
+    <span class="keyword">if</span> isempty(find(Hmat ~= 0))
+        R = [];
+    <span class="keyword">end</span>
+    <span class="comment">% initial guess</span>
+    sizeH = size(R,1) + size(Radd,1);
+    uoPDE = zeros(N*numNodes+sizeH,1);
+    uoPDE(1:2*numNodes,1) = uoGeometry;
+    uinitialPDE = zeros(N*numNodes+sizeH,1);
+    uinitialPDE(1:N*numNodes,1) = uoPDE(1:N*numNodes);
+
+    <span class="keyword">for</span> stepNumber=1:numDeflectionSteps
+        xyphi = solveGeomNonlinear(uinitialPDE,uoPDE,coeff,bc,false,Hadd,Radd); <span class="comment">% a basic nonlinear solver</span>
+        uinitialPDE = xyphi;
+        xyphi = xyphi(1:N*numNodes);
+        xyphi = reshape(xyphi,numNodes,[]);
+        beam.mesh.p(1:2,:) = xyphi(:,1:2)';
+        fprintf(<span class="string">'Tip Y coordinate is %e\n'</span>,beam.mesh.p(2,freeNodes(topRightCornerIndex)));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+figure(1);beam.plot(<span class="string">'showMesh'</span>,true);axis <span class="string">equal</span>;
+fprintf(<span class="string">'Tip Y coordinate is %e\n'</span>,beam.mesh.p(2,freeNodes(topRightCornerIndex)));
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [] = beam()
+%[uxy,vxy,phixy] = piezoExample;
+import pdetbplus.*;
+%%
+    function [equations,variables] = elasticitySymbolicFunction()
+        %% PDE input, define eq and input;
+        % Reserved keywords: ddx,ddy,d[variable]dx,d[variable]dy
+        % specify the Div Grad operator "grad." as ddx*, ddy*
+        syms ddx ddy real;
+        % user input begins
+        syms E nu real;
+        syms u v dudx dudy dvdx dvdy real;
+        
+        % material constants
+        G = E/(1-nu^2);
+        C11 = G;
+        C12 = G*nu;
+        C22 = G;
+        C33 = G*(1-nu)/2;
+        
+        % deformation gradient
+        F = sym(eye(2)) + [dudx dudy;dvdx dvdy];
+        % Green-Lagrange strain tensor
+        strainTensor =  1/2*expand(F.'*F - sym(eye(2)));
+        
+        ex = strainTensor(1,1);
+        ey = strainTensor(2,2);
+        gxy = 2*strainTensor(1,2); % same as 2*E(2,1); "2" for engineering strain
+        
+        Sx = C11*ex + C12*ey;
+        Sy = C12*ex + C22*ey;
+        Txy = C33*gxy;
+        equations = [ddx ddy]*[Sx Txy; Txy Sy] - [1 0];
+        display Problem_Equations;
+        pretty(equations');
+        % plug in values
+        equations = subs(equations,{E,nu},[2e9,0.29]);
+        display Equations_with_values
+        pretty(equations');
+        variables = [u v];
+    end
+%% geometry
+L = 100e-3;
+H = 1e-3;
+p{1} = pointObject(0,0);
+p{2} = p{1} + [0,H];
+p{3} = p{2} + [L,0];
+p{4} = p{3} - [0,H];
+a{1} = lineObject('wall',p{1},p{2});
+a{2} = lineObject('top',p{2},p{3});
+a{3} = lineObject('free',p{3},p{4});
+a{4} = lineObject('bottom',p{4},p{1});
+for kk=1:length(a)
+    a{kk}.leftRegion = 'nonMeshedSpace';
+    a{kk}.rightRegion = 'beamMaterial';
+end
+beam = geometryObject('beam',a);
+beam.exteriorRegion = 'nonMeshedSpace';
+beam.plot();
+beam = beam.initMesh('showMesh',true,'Hmax',H/5); axis('equal');
+%% boundary conditions
+N = 2; % output dimension
+stepNumber = 1;
+numDeflectionSteps = 3;
+% instantiate boundaryConditionObject for convenient definition of BCs
+bc = boundaryConditionObject(beam, N);
+    function [hval,rval,qval,gval] = bcondWall(x,y,u,t)
+        % Dirichlet condition on the boundary
+        rval = zeros(N,1);
+        hval = speye(N);
+        qval = sparse(N,N);
+        gval = sparse(N,1);
+    end
+    function [hval,rval,qval,gval] = bcondFree(x,y,u,t)
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        qval = sparse(N,N);
+        gval(1) = 0;
+        gval(2) = stepNumber/numDeflectionSteps*5/H;
+    end
+for k=1:length(a)
+    if strfind(a{k}.name,'wall')
+        bc = bc.addBC('name',a{k}.name,'xyutFunction',@bcondWall);
+    elseif strfind(a{k}.name,'free')
+        bc = bc.addBC('name',a{k}.name,'xyutFunction',@bcondFree);
+    end
+end
+%% coefficients
+coeff = coeffsObject(beam, N);
+coeff = coeff.addCoeff('region','beamMaterial','symbolicEquationFunction',@elasticitySymbolicFunction);
+%% solve
+a = 0; % magnetostatic problem
+numNodes = size(beam.mesh.p,2);
+freeNodes = beam.getBoundaryNodes('name','free');
+[~,topRightCornerIndex] = max(beam.mesh.p(2,freeNodes));
+usePdenonlin = true;
+if usePdenonlin
+    u = zeros(N*numNodes,1); %initial guess
+    for stepNumber=1:numDeflectionSteps
+        %u=pdenonlin(@bc.bcFunction,beam.mesh.p,beam.mesh.e,beam.mesh.t,@coeff.cFunction,a,[0 0]','Report','on','Jacobian','full','U0',u);
+        u=assempde(@bc.bcFunction,beam.mesh.p,beam.mesh.e,beam.mesh.t,@coeff.cFunction,a,[0 0]');
+    end
+    uu = reshape(u,numNodes,[]);
+    beam.mesh.p(1:2,:) = beam.mesh.p(1:2,:) + uu(:,1:2)';
+else
+    % add additional constraints
+    Hadd = sparse(0,0);
+    Radd = [];  
+    uoGeometry = beam.mesh.p(1:2,:)';
+    uoGeometry = uoGeometry(:);
+    [~,~,Hmat,R] = bc.getMatrices('solution',zeros(N*numNodes,1));
+    if isempty(find(Hmat ~= 0))
+        R = [];
+    end
+    % initial guess
+    sizeH = size(R,1) + size(Radd,1);
+    uoPDE = zeros(N*numNodes+sizeH,1);
+    uoPDE(1:2*numNodes,1) = uoGeometry;
+    uinitialPDE = zeros(N*numNodes+sizeH,1);
+    uinitialPDE(1:N*numNodes,1) = uoPDE(1:N*numNodes);
+    
+    for stepNumber=1:numDeflectionSteps
+        xyphi = solveGeomNonlinear(uinitialPDE,uoPDE,coeff,bc,false,Hadd,Radd); % a basic nonlinear solver
+        uinitialPDE = xyphi;
+        xyphi = xyphi(1:N*numNodes);
+        xyphi = reshape(xyphi,numNodes,[]);
+        beam.mesh.p(1:2,:) = xyphi(:,1:2)';
+        fprintf('Tip Y coordinate is %e\n',beam.mesh.p(2,freeNodes(topRightCornerIndex)));
+    end
+end
+figure(1);beam.plot('showMesh',true);axis equal;
+fprintf('Tip Y coordinate is %e\n',beam.mesh.p(2,freeNodes(topRightCornerIndex)));
+end
+##### SOURCE END #####
+--></body></html>

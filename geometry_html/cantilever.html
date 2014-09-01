@@ -1,0 +1,586 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>cantilever</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-10-14"><meta name="DC.source" content="cantilever.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Specifying nonlinear constitutive equations for a linearly elastic material using Symbolic Math Toolbox</a></li><li><a href="#3">Geometry of cantilever</a></li><li><a href="#4">Coefficients</a></li><li><a href="#6">Boundary conditions for linear problem</a></li><li><a href="#7">Linear solve</a></li><li><a href="#8">Post process linear solution</a></li><li><a href="#9">Solve using a nonlinear solver</a></li></ul></div><h2>Specifying nonlinear constitutive equations for a linearly elastic material using Symbolic Math Toolbox<a name="1"></a></h2><p><b>Introduction</b></p><p>Specifying constitutive equations for the PDE Toolbox can be complicated if the equations are involved. A simple cantilever example is used to demonstrate how the Helper classes leverage Symbolic Math Toolbox (R2012b+) for convenient input of the equations. This cantilever example is based on the geometry described in Reference 2 and</p><div><ul><li>Specifies nonlinear constitutive equations for a linearly elastic material using Symbolic Math Toolbox (R2012b or greater)</li><li>Shows a convenient way to specify boundary conditions using named boundaries</li><li>Demonstrates a simple nonlinear solution in the reference configuration using accurate jacobians constructed using the Symbolic Math Toolbox. The solution is matched against the result in figure 3 in Reference 2</li><li>Demonstrates that the linear solution is not adequate for the given load</li></ul></div><p><b>Requirements:</b> PDE Toolbox, Helper classes for PDE Toolbox, Symbolic Math Toolbox (R2012b and greater)</p><p><b>Formulation</b></p><p>See Reference 1 or any other continuum mechanics reference for details</p><p><i><b>1. PDE</b></i> :</p><p><img src="cantilever_eq12607.png" alt="$$ -\nabla . (S F^T) = \pmatrix{0 \cr -\rho g} $$"></p><p>where <img src="cantilever_eq68961.png" alt="$S$"> is the 2nd Piola-Kirchoff Stress tensor, <img src="cantilever_eq86924.png" alt="$F$"> is the deformation gradient, <img src="cantilever_eq20099.png" alt="$\rho$"> is the density, and <img src="cantilever_eq31049.png" alt="$g$"> is the acceleration due to gravity</p><p><b>PDE Toolbox requires the formulation to be specified in the so-called reference configuration (as opposed to deformed configuration). Therefore the above form is used.</b></p><p><img src="cantilever_eq68961.png" alt="$S$"> is written in matrix form as</p><p><img src="cantilever_eq14823.png" alt="$$ S = \pmatrix{S_x &amp; T_{xy} \cr T_{xy} &amp; S_y} $$"></p><p><i><b>2. Constitutive Equations</b></i></p><p>The 2nd Piola-Kirchoff stress tensor is in fact work conjugate with the Green-Lagrange strain tensor so we can express in terms of a simple constitutive relation</p><p><img src="cantilever_eq51809.png" alt="$$ \pmatrix{S_x \cr S_y \cr T_{xy}} = \pmatrix{C_{11} &amp; C_{12} &amp; 0 \cr&#xA;C_{12} &amp; C_{22} &amp; 0 \cr 0 &amp; 0 &amp; C_{66}}\pmatrix{\epsilon_{11} \cr \epsilon_{22} \cr&#xA;2 \epsilon_{12}} $$"></p><p>Green-Lagrange strain tensor</p><p><img src="cantilever_eq46491.png" alt="$$ \epsilon = \pmatrix{\epsilon_{11} &amp; \epsilon_{12} \cr \epsilon_{12} &amp; \epsilon_{22}} = \frac{1}{2} (F^TF-I) $$"></p><p>Deformation gradient; <img src="cantilever_eq35435.png" alt="$u$"> is the displacement</p><p><img src="cantilever_eq22977.png" alt="$$ F = (I + \nabla u) $$"></p><p>Material constants, <img src="cantilever_eq85525.png" alt="$E$"> - Modulus of Elasticity, <img src="cantilever_eq69196.png" alt="$\nu$"> = Poisson's ratio</p><p><img src="cantilever_eq27996.png" alt="$$ C_{11} = \frac{E}{1-\nu^2}, C_{12} = C_{11} \nu, C_{22} = C_{11},&#xA;C_{66} = C_{11} \frac{1-\nu}{2} $$"></p><p><i><b>3. Geometry and BC</b></i></p><p>The example is a simple cantilever of unit width fixed on the left end and with a load distributed on the free edge as shown in the picture below (not to scale).</p><p><img vspace="5" hspace="5" src="cantileverDistributedEndLoad.png" alt=""> </p><p><b>References</b> : (1) <a href="http://geo.mff.cuni.cz/vyuka/Martinec-ContinuumMechanics.pdf">http://geo.mff.cuni.cz/vyuka/Martinec-ContinuumMechanics.pdf</a>, (2) <a href="http://www.lajss.org/index.php/LAJSS/article/download/240/208">http://www.lajss.org/index.php/LAJSS/article/download/240/208</a></p><p><i>See exampleGeometries.m</i> and <i>exampleFormulation.m</i> on how to use the Helper classes used in this example</p><pre class="codeinput"><span class="comment">%</span>
+<span class="keyword">function</span> [] = cantilever()
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% access Helper classes</span>
+</pre><h2>Geometry of cantilever<a name="3"></a></h2><p>length</p><pre class="codeinput">L = 10;
+<span class="comment">% height</span>
+H = 0.1;
+<span class="comment">% B = 1; unit width is used. Therefore weight for area dA = rho*g*dA</span>
+p{1} = pointObject(0,0); <span class="comment">% lower left</span>
+p{2} = p{1} + [0,H]; <span class="comment">% upper left</span>
+p{3} = p{2} + [L,0]; <span class="comment">% upper right</span>
+p{4} = p{3} - [0,H]; <span class="comment">% lower right</span>
+a{1} = lineObject(<span class="string">'wall'</span>,p{1},p{2}); <span class="comment">% fixed edge</span>
+a{2} = lineObject(<span class="string">'top'</span>,p{2},p{3}); <span class="comment">% top</span>
+a{3} = lineObject(<span class="string">'free'</span>,p{3},p{4}); <span class="comment">% hanging edge</span>
+a{4} = lineObject(<span class="string">'bottom'</span>,p{4},p{1}); <span class="comment">% bottom</span>
+<span class="keyword">for</span> kk=1:length(a)
+    a{kk}.leftRegion = <span class="string">'nonMeshedSpace'</span>; <span class="comment">% area that will not be meshed</span>
+    a{kk}.rightRegion = <span class="string">'beamMaterial'</span>; <span class="comment">% beam material</span>
+<span class="keyword">end</span>
+cantilever = geometryObject(<span class="string">'beam'</span>,a); <span class="comment">% helper class</span>
+cantilever.exteriorRegion = <span class="string">'nonMeshedSpace'</span>; <span class="comment">% necessary step for initmesh()</span>
+cantilever = cantilever.initMesh(<span class="string">'showMesh'</span>,false,<span class="string">'Hmax'</span>,H/10); <span class="comment">% H/10 should give an accurate enough answer</span>
+</pre><pre class="codeoutput">
+warning: Approximately 20000 triangles will be generated.
+</pre><h2>Coefficients<a name="4"></a></h2><pre class="codeinput">N = 2; <span class="comment">% output dimension</span>
+coeff = coeffsObject(cantilever, N); <span class="comment">% helper class</span>
+</pre><pre class="language-matlab"><span class="comment">% Define equations using Symbolic Math Toolbox; To avoid errors, make</span>
+<span class="comment">% this function standalone instead of a nested function</span>
+<span class="keyword">function</span> [equations,variables] = elasticitySymbolicFunction(displayEquations)
+displayEquations = true;
+<span class="keyword">for</span> k=1:2:length(varargin)
+    a = varargin(k);
+    b = varargin(k+1);
+    <span class="keyword">if</span> strcmp(a,<span class="string">'displayEquations'</span>)
+       displayEquations = b{1};
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">%% PDE input, define eq and input;</span>
+<span class="comment">% *Reserved keywords: x,y,time,ddx,ddy,d[variable]dx,d[variable]dy*</span>
+<span class="comment">% *specify the Div operator as [ddx ddy]</span>
+syms <span class="string">ddx</span> <span class="string">ddy</span> <span class="string">real</span>;
+<span class="comment">% user input begins</span>
+<span class="comment">% define Modulus of Elasticity, Poisson's ration, Density, Acceleration</span>
+<span class="comment">% due to gravity</span>
+syms <span class="string">E</span> <span class="string">nu</span> <span class="string">rho</span> <span class="string">g</span> <span class="string">real</span>;
+syms <span class="string">u</span> <span class="string">v</span> <span class="string">dudx</span> <span class="string">dudy</span> <span class="string">dvdx</span> <span class="string">dvdy</span> <span class="string">real</span>;
+<span class="comment">%% material constants</span>
+G = E/(1-nu^2);
+C11 = G;
+C12 = G*nu;
+C22 = G;
+C66 = G*(1-nu)/2;
+<span class="comment">%% deformation gradient</span>
+F = sym(eye(2)) + [dudx dudy;dvdx dvdy];
+<span class="comment">%% Green-Lagrange strain tensor</span>
+epsilon =  1/2*expand(F.'*F - sym(eye(2)));
+epsilon11 = epsilon(1,1);
+epsilon22 = epsilon(2,2);
+epsilon12 = epsilon(1,2);
+<span class="comment">%% 2nd Piola&#8211;Kirchhoff stress tensor</span>
+Sx = C11*epsilon11 + C12*epsilon22;
+Sy = C12*epsilon11 + C22*epsilon22;
+Txy = C66*2*epsilon12; <span class="comment">% watch out for factor of 2 for engineering strain</span>
+PK2 = [Sx Txy;Txy Sy];
+PK1 = PK2*F';
+equations = -[ddx ddy]*PK1 + [0 -rho*g];
+<span class="comment">%% plug in values</span>
+<span class="comment">% Material properties for Iron; E = 30e6 lbs/cm^2, nu = 0.3</span>
+equations = subs(equations,{E,nu,rho,g},[30e6,0.3,0.00074,32.2*12]);
+<span class="keyword">if</span> displayEquations
+  display <span class="string">Equations_with_values</span>
+  pretty(equations');
+<span class="keyword">end</span>
+variables = [u v];
+<span class="keyword">end</span>
+</pre><p>Specify equations that are symbolically defined in elasticitySymbolicFunction. Display equations is turned on by default. <i><b>Always verify that the equations corresponding to coefficients are what you expect</b></i></p><pre class="codeinput">coeff = coeff.addCoeff(<span class="string">'region'</span>,<span class="string">'beamMaterial'</span>,<span class="string">'symbolicEquationFunction'</span>,@elasticitySymbolicFunction); <span class="comment">% requires Symbolic Math Toolbox</span>
+</pre><pre class="codeoutput">Equations_with_values
+ 
+  +-                                                                                       -+ 
+  |  - ddy (dudy #2 + (1200000 dudx + 1200000) #1) - ddx ((dudx + 1) #3 + 1200000 dudy #1)  | 
+  |                                                                                         | 
+  |  - ddx (dvdx #3 + (1200000 dvdy + 1200000) #1) - ddy ((dvdy + 1) #2 + 1200000 dvdx #1)  | 
+  +-                                                                                       -+ 
+   
+  where 
+   
+           dudy   dvdx   dudx dudy   dvdx dvdy 
+     #1 == ---- + ---- + --------- + --------- 
+            2      2         2           2 
+   
+                      2              2 
+     #2 == 600000 dudy  + 600000 dvdy  + 1200000 dvdy 
+   
+                      2                             2 
+     #3 == 600000 dudx  + 1200000 dudx + 600000 dvdx
+Cmatrix
+ 
+  +-                                                                                                                                                               -+ 
+  |             2                             2              2                                                                                                      | 
+  |  600000 dudx  + 1800000 dudx + 600000 dudy  + 600000 dvdx  + 1200000,           600000 dudy + #2,                600000 dvdx,                   0               | 
+  |                                                                                                                                                                 | 
+  |                                                                                                 2                                                               | 
+  |    1200000 dudy + 600000 dvdx + 600000 dudx dudy + 600000 dvdx dvdy,            #1 + 600000 dudy ,          600000 dvdy + 600000,               0               | 
+  |                                                                                                                                                                 | 
+  |                                                                                                                               2                                 | 
+  |    600000 dudy + 1200000 dvdx + 600000 dudx dvdx + 600000 dudy dvdy,          600000 dvdy + 600000,           #1 + 600000 dvdx ,                0               | 
+  |                                                                                                                                                                 | 
+  |                            600000 dudy dvdx,                          600000 dvdx + 600000 dudy (dvdy + 1),          #2,          600000 (dvdy + 1) (dvdy + 2)  | 
+  +-                                                                                                                                                               -+ 
+   
+  where 
+   
+                            2 
+     #1 == 600000 (dvdy + 1) 
+   
+     #2 == 600000 dvdx (dvdy + 1)
+Fvector
+ 
+  +-    -+ 
+  | 0, 0 | 
+  +-    -+
+</pre><h2>Boundary conditions for linear problem<a name="6"></a></h2><pre class="codeinput">Load = -4; <span class="comment">% Note: "-" sign for downward load</span>
+<span class="comment">% instantiate boundaryConditionObject for convenient definition of BCs</span>
+bc = boundaryConditionObject(cantilever, N); <span class="comment">% helper class</span>
+<span class="comment">% Dirichlet conditions are specified for wall. Other ways to specify BCs</span>
+<span class="comment">% are to specify for function for wall or to specify in terms of regions</span>
+bc = bc.addBC(<span class="string">'name'</span>,<span class="string">'wall'</span>,<span class="string">'dirichlet'</span>,[0;0]); <span class="comment">% Dirichlet condition on wall</span>
+<span class="comment">% uniformly distributed load on the "free" boundary. Note: Reference 2 had</span>
+<span class="comment">% a point load but for demonstration purpose we use a distributed load that</span>
+<span class="comment">% should provide a close enough answer</span>
+bc = bc.addBC(<span class="string">'name'</span>,<span class="string">'free'</span>,<span class="string">'neumann'</span>,[0;Load/H]);
+numNodes = size(cantilever.mesh.p,2);
+</pre><h2>Linear solve<a name="7"></a></h2><p>Using solution = 0, to set d/dx,d/dy terms in the C matrix to 0 effectively using the infinitesimal strain tensor (linear). Thus <i>we could have used the linear tensor instead of the Green-Lagrange tensor</i> . However the purpose of this example is to demonstrate convenient symbolic processing of general constitutive equations. Consequently the matrix form of assempde() in PDE Toolbox is used to solve</p><pre class="codeinput">[Q,G,Hmat,R] = bc.getMatrices(<span class="string">'u'</span>,zeros(N*numNodes,1)); <span class="comment">% 'Hmat' because 'H' has alerady been defined</span>
+[K,M,F] = coeff.getMatrices(<span class="string">'u'</span>,zeros(N*numNodes,1));
+u=assempde(K,M,F,Q,G,Hmat,R); <span class="comment">% use matrix form to solve</span>
+</pre><h2>Post process linear solution<a name="8"></a></h2><pre class="codeinput">uu = reshape(u,numNodes,[]); <span class="comment">% u is numNodes x 2</span>
+LinearVerticalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,2)); <span class="comment">% create a function from solution</span>
+LinearHorizontalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,1)); <span class="comment">% create a function from solution</span>
+LinearVerticalDeflectionTip = LinearVerticalDeflectionxy(L-eps,H-eps); <span class="comment">% vertical deflection</span>
+LinearHorizontalDeflectionTip = LinearHorizontalDeflectionxy(L-eps,H-eps); <span class="comment">% horizontal deflection</span>
+fprintf(<span class="string">'Linear solver: load = %e, Tip Y deflection = %e, Tip X deflection = %e\n'</span>,Load,LinearVerticalDeflectionTip,LinearHorizontalDeflectionTip);
+<span class="comment">% make a copy of cantilever that we can adjust</span>
+cantileverAfterLinearSolve = cantilever;
+cantileverAfterLinearSolve.mesh.p(1:2,:) = cantileverAfterLinearSolve.mesh.p(1:2,:) + uu(:,1:2)'; <span class="comment">% update geometry</span>
+figure(1); cantileverAfterLinearSolve.plot(<span class="string">'showMesh'</span>,true); axis <span class="string">equal</span>;grid <span class="string">on</span>; <span class="comment">% show deflected beam</span>
+title(<span class="string">'linear deformed geometry'</span>);
+</pre><pre class="codeoutput">Linear solver: load = -4.000000e+00, Tip Y deflection = -1.316130e+01, Tip X deflection = 9.870573e-02
+</pre><img vspace="5" hspace="5" src="cantilever_01.png" alt=""> <h2>Solve using a nonlinear solver<a name="9"></a></h2><p>we could use pdenonlin() that uses an approximate jacobian but instead, we use a simple newton solver because in this example, we have the exact jacobian available since we used a symbolic description of the equations.</p><p>use a simple load stepping scheme to get the nonlinear solution</p><pre class="codeinput">lambda = 0;
+lambdastep = 0.05;
+verticalDeflectionTip = []; horizontalDeflectionTip = []; loads = [];
+iter = 1;
+<span class="keyword">while</span> lambda &lt;= 1
+    fprintf(<span class="string">'iter = %d\n'</span>,iter);
+    lambda = min(1,lambda+lambdastep);
+    bc = boundaryConditionObject(cantilever, N); <span class="comment">% helper class</span>
+    <span class="comment">% Dirichlet conditions are specified for wall. Other ways to specify BCs</span>
+    <span class="comment">% are to specify for function for wall or to specify in terms of regions</span>
+    bc = bc.addBC(<span class="string">'name'</span>,<span class="string">'wall'</span>,<span class="string">'dirichlet'</span>,[0;0]); <span class="comment">% Dirichlet condition on wall</span>
+    bc = bc.addBC(<span class="string">'name'</span>,<span class="string">'free'</span>,<span class="string">'neumann'</span>,[0;lambda*Load/H]);
+    <span class="keyword">if</span> iter == 1
+        [ucan,converged] = solveGeomNonlinear(<span class="string">'coeff'</span>,coeff,<span class="string">'bc'</span>,bc); <span class="comment">% first time, there is no initial guess</span>
+    <span class="keyword">else</span>
+        [ucan,converged] = solveGeomNonlinear(<span class="string">'coeff'</span>,coeff,<span class="string">'bc'</span>,bc,<span class="string">'uinitial'</span>,u); <span class="comment">% there is an initial guess</span>
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> converged
+        u = ucan;
+        uu = reshape(u(1:2*numNodes),numNodes,[]); <span class="comment">% this is displacement</span>
+        verticalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,2));
+        horizontalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,1));
+        verticalDeflectionTip = [verticalDeflectionTip verticalDeflectionxy(L-eps,H-eps)];
+        horizontalDeflectionTip = [horizontalDeflectionTip horizontalDeflectionxy(L-eps,H-eps)];
+        loads = [loads lambda*Load];
+        fprintf(<span class="string">'NonLinear solver: load = %e, Tip Y deflection = %e, Tip X deflection = %e\n'</span>,loads(end), verticalDeflectionTip(end),horizontalDeflectionTip(end));
+        <span class="keyword">if</span> lambda == 1
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+        iter = iter + 1;
+        lambdastep = lambdastep*2;
+    <span class="keyword">else</span>
+        fprintf(<span class="string">'step failed, rerunning with smaller step\n'</span>);
+        lambda = lambda - lambdastep;
+        lambdastep = lambdastep/1.2;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">if</span> converged
+    cantileverAfterNonLinearSolve = cantilever; <span class="comment">% make a copy of cantilever that we can adjust</span>
+    cantileverAfterNonLinearSolve.mesh.p(1:2,:) = cantileverAfterNonLinearSolve.mesh.p(1:2,:) + uu'; <span class="comment">% update geometry</span>
+    <span class="comment">% plot nonlinearly deformed cantilever</span>
+    figure(2); cantileverAfterNonLinearSolve.plot(<span class="string">'showMesh'</span>,true); axis <span class="string">equal</span>;grid <span class="string">on</span>;
+    title(<span class="string">'nonlinear deformed geometry'</span>);
+    <span class="comment">% Plot deformation curves as in Reference, we get a good match.</span>
+    <span class="comment">% The plots also show that linear analysis for this problem is not</span>
+    <span class="comment">% adequate</span>
+    figure(3);
+    plot(abs(verticalDeflectionTip),abs(loads),<span class="string">'-ro'</span>,abs(horizontalDeflectionTip),abs(loads),<span class="string">'-ko'</span>,<span class="keyword">...</span>
+        abs(LinearVerticalDeflectionTip/Load*loads),abs(loads),<span class="string">'-r*'</span>,abs(LinearHorizontalDeflectionTip/Load*loads),abs(loads),<span class="string">'-k*'</span>);
+        title(<span class="string">'|Load| vs |Vertical and horizontal tip deflections| for linear and nonlinear cases'</span>);
+    legend(<span class="string">'verticalNonlinear'</span>,<span class="string">'horizontalNonlinear'</span>,<span class="string">'verticalLinear'</span>,<span class="string">'horizontalLinear'</span>,<span class="string">'Location'</span>,<span class="string">'SouthEast'</span>);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">iter = 1
+|du|/|u| = 1.000000e+00 |rhs| = 6.164414e-02
+|du|/|u| = 3.076260e-02 |rhs| = 1.682646e+03
+|du|/|u| = 1.186424e-03 |rhs| = 1.038252e+01
+|du|/|u| = 4.236666e-04 |rhs| = 1.158997e-03
+|du|/|u| = 1.330378e-07 |rhs| = 3.072123e-04
+Found geometrically consistent solution
+NonLinear solver: load = -2.000000e-01, Tip Y deflection = -6.554005e-01, Tip X deflection = -2.088225e-02
+iter = 2
+|du|/|u| = 6.653890e-01 |rhs| = 1.232883e-01
+|du|/|u| = 3.988329e-02 |rhs| = 6.670912e+03
+|du|/|u| = 2.734685e-03 |rhs| = 1.529440e+02
+|du|/|u| = 1.300057e-02 |rhs| = 1.094978e-01
+|du|/|u| = 1.666419e-04 |rhs| = 2.713835e+00
+|du|/|u| = 9.410111e-05 |rhs| = 5.806670e-04
+Found geometrically consistent solution
+NonLinear solver: load = -6.000000e-01, Tip Y deflection = -1.902557e+00, Tip X deflection = -2.053010e-01
+iter = 3
+|du|/|u| = 5.594417e-01 |rhs| = 2.465710e-01
+|du|/|u| = 5.902878e-02 |rhs| = 2.369524e+04
+|du|/|u| = 5.226108e-03 |rhs| = 1.587378e+03
+|du|/|u| = 2.516266e-02 |rhs| = 1.040342e+01
+|du|/|u| = 3.692663e-03 |rhs| = 3.127361e+01
+|du|/|u| = 1.705186e-02 |rhs| = 2.508812e+00
+|du|/|u| = 1.131583e-03 |rhs| = 2.353694e+01
+|du|/|u| = 5.195350e-03 |rhs| = 1.672603e-01
+|du|/|u| = 1.026803e-04 |rhs| = 2.448294e+00
+|du|/|u| = 4.447223e-05 |rhs| = 1.043281e-03
+|du|/|u| = 4.728060e-08 |rhs| = 1.793575e-04
+Found geometrically consistent solution
+NonLinear solver: load = -1.400000e+00, Tip Y deflection = -3.887122e+00, Tip X deflection = -9.258453e-01
+iter = 4
+|du|/|u| = 4.821101e-01 |rhs| = 4.931531e-01
+|du|/|u| = 6.946800e-02 |rhs| = 5.539957e+04
+|du|/|u| = 9.978710e-03 |rhs| = 6.494277e+03
+|du|/|u| = 2.067321e-02 |rhs| = 1.566894e+02
+|du|/|u| = 2.496696e-02 |rhs| = 3.902823e+01
+|du|/|u| = 9.499701e-03 |rhs| = 3.721649e+02
+|du|/|u| = 3.280304e-02 |rhs| = 8.875359e+00
+|du|/|u| = 2.449357e-03 |rhs| = 2.734039e+02
+|du|/|u| = 1.505073e-02 |rhs| = 6.103125e-01
+|du|/|u| = 2.244486e-04 |rhs| = 3.660182e+01
+|du|/|u| = 5.699847e-04 |rhs| = 1.012964e-02
+|du|/|u| = 6.147074e-07 |rhs| = 6.745862e-02
+|du|/|u| = 8.598320e-09 |rhs| = 2.146114e-07
+Found geometrically consistent solution
+NonLinear solver: load = -3.000000e+00, Tip Y deflection = -6.022460e+00, Tip X deflection = -2.470386e+00
+iter = 5
+|du|/|u| = 1.661365e-01 |rhs| = 3.082207e-01
+|du|/|u| = 8.375256e-03 |rhs| = 5.216883e+03
+|du|/|u| = 3.634256e-03 |rhs| = 8.847272e+01
+|du|/|u| = 1.488717e-02 |rhs| = 1.758955e+00
+|du|/|u| = 4.585662e-04 |rhs| = 7.425877e+01
+|du|/|u| = 1.867965e-03 |rhs| = 5.397545e-02
+|du|/|u| = 8.354744e-06 |rhs| = 1.144205e+00
+|du|/|u| = 8.748077e-07 |rhs| = 2.907853e-05
+Found geometrically consistent solution
+NonLinear solver: load = -4.000000e+00, Tip Y deflection = -6.700613e+00, Tip X deflection = -3.210784e+00
+</pre><img vspace="5" hspace="5" src="cantilever_02.png" alt=""> <img vspace="5" hspace="5" src="cantilever_03.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Specifying nonlinear constitutive equations for a linearly elastic material using Symbolic Math Toolbox
+% *Introduction*
+%
+% Specifying constitutive equations for the PDE Toolbox can be
+% complicated if the equations are involved. A simple cantilever example is used to demonstrate how the Helper classes leverage Symbolic Math
+% Toolbox (R2012b+) for convenient input of the equations.
+% This cantilever example is based on the geometry described in Reference 2 and
+%
+% * Specifies nonlinear constitutive equations for a linearly elastic material using Symbolic Math
+% Toolbox (R2012b or greater)
+% * Shows a convenient way to specify boundary conditions using named
+% boundaries
+% * Demonstrates a simple nonlinear solution in the reference configuration using accurate jacobians
+% constructed using the Symbolic Math Toolbox. The solution is matched
+% against the result in figure 3 in Reference 2
+% * Demonstrates that the linear solution is not adequate for the given
+% load
+%
+% *Requirements:* PDE Toolbox, Helper classes for PDE Toolbox, Symbolic
+% Math Toolbox (R2012b and greater)
+%
+% *Formulation*
+%
+% See Reference 1 or any other continuum mechanics reference for details
+%
+% _*1. PDE*_ : 
+%
+% $$ -\nabla . (S F^T) = \pmatrix{0 \cr -\rho g} $$
+%
+% where $S$ is the 2nd Piola-Kirchoff Stress tensor, $F$
+% is the deformation gradient, $\rho$ is the density, and $g$ is the acceleration due to gravity
+%
+% *PDE Toolbox requires the formulation to be specified in the so-called reference configuration (as opposed to deformed configuration). 
+% Therefore the above form is used.* 
+% 
+% $S$ is written in matrix form as
+% 
+% $$ S = \pmatrix{S_x & T_{xy} \cr T_{xy} & S_y} $$
+% 
+% _*2. Constitutive Equations*_
+% 
+% The 2nd Piola-Kirchoff stress tensor is in
+% fact work conjugate with the Green-Lagrange strain tensor so we can
+% express in terms of a simple constitutive relation
+%
+% $$ \pmatrix{S_x \cr S_y \cr T_{xy}} = \pmatrix{C_{11} & C_{12} & 0 \cr
+% C_{12} & C_{22} & 0 \cr 0 & 0 & C_{66}}\pmatrix{\epsilon_{11} \cr \epsilon_{22} \cr
+% 2 \epsilon_{12}} $$
+%
+% Green-Lagrange strain tensor
+%
+% $$ \epsilon = \pmatrix{\epsilon_{11} & \epsilon_{12} \cr \epsilon_{12} & \epsilon_{22}} = \frac{1}{2} (F^TF-I) $$ 
+%
+% Deformation gradient; $u$ is the displacement
+%
+% $$ F = (I + \nabla u) $$ 
+% 
+% Material constants, $E$ - Modulus of Elasticity, $\nu$ = Poisson's ratio
+%
+% $$ C_{11} = \frac{E}{1-\nu^2}, C_{12} = C_{11} \nu, C_{22} = C_{11},
+% C_{66} = C_{11} \frac{1-\nu}{2} $$
+%
+% _*3. Geometry and BC*_
+%
+% The example is a simple cantilever of unit width fixed on the left end and with a
+% load distributed on the free edge as shown in the picture below (not to scale).
+%
+% <<cantileverDistributedEndLoad.png>>
+%
+% *References* : (1) http://geo.mff.cuni.cz/vyuka/Martinec-ContinuumMechanics.pdf, (2) http://www.lajss.org/index.php/LAJSS/article/download/240/208
+% 
+% _See exampleGeometries.m_ and _exampleFormulation.m_ on how to use the
+% Helper classes used in this example
+%
+%  
+%
+function [] = cantilever()
+import pdetbplus.*; % access Helper classes
+%% Geometry of cantilever
+% length
+L = 10;
+% height
+H = 0.1;
+% B = 1; unit width is used. Therefore weight for area dA = rho*g*dA
+p{1} = pointObject(0,0); % lower left
+p{2} = p{1} + [0,H]; % upper left
+p{3} = p{2} + [L,0]; % upper right
+p{4} = p{3} - [0,H]; % lower right
+a{1} = lineObject('wall',p{1},p{2}); % fixed edge
+a{2} = lineObject('top',p{2},p{3}); % top
+a{3} = lineObject('free',p{3},p{4}); % hanging edge
+a{4} = lineObject('bottom',p{4},p{1}); % bottom
+for kk=1:length(a)
+    a{kk}.leftRegion = 'nonMeshedSpace'; % area that will not be meshed
+    a{kk}.rightRegion = 'beamMaterial'; % beam material
+end
+cantilever = geometryObject('beam',a); % helper class
+cantilever.exteriorRegion = 'nonMeshedSpace'; % necessary step for initmesh()
+cantilever = cantilever.initMesh('showMesh',false,'Hmax',H/10); % H/10 should give an accurate enough answer
+%% Coefficients
+%
+N = 2; % output dimension
+coeff = coeffsObject(cantilever, N); % helper class
+%%
+% 
+%    
+%   % Define equations using Symbolic Math Toolbox; To avoid errors, make
+%   % this function standalone instead of a nested function
+%   function [equations,variables] = elasticitySymbolicFunction(displayEquations)
+%   displayEquations = true;
+%   for k=1:2:length(varargin)
+%       a = varargin(k);
+%       b = varargin(k+1);
+%       if strcmp(a,'displayEquations')
+%          displayEquations = b{1};
+%       end
+%   end
+%   %% PDE input, define eq and input;
+%   % *Reserved keywords: x,y,time,ddx,ddy,d[variable]dx,d[variable]dy*
+%   % *specify the Div operator as [ddx ddy]
+%   syms ddx ddy real;
+%   % user input begins
+%   % define Modulus of Elasticity, Poisson's ration, Density, Acceleration
+%   % due to gravity
+%   syms E nu rho g real;
+%   syms u v dudx dudy dvdx dvdy real;
+%   %% material constants
+%   G = E/(1-nu^2);
+%   C11 = G;
+%   C12 = G*nu;
+%   C22 = G;
+%   C66 = G*(1-nu)/2;
+%   %% deformation gradient
+%   F = sym(eye(2)) + [dudx dudy;dvdx dvdy];
+%   %% Green-Lagrange strain tensor
+%   epsilon =  1/2*expand(F.'*F - sym(eye(2)));
+%   epsilon11 = epsilon(1,1);
+%   epsilon22 = epsilon(2,2);
+%   epsilon12 = epsilon(1,2);
+%   %% 2nd Piola–Kirchhoff stress tensor
+%   Sx = C11*epsilon11 + C12*epsilon22;
+%   Sy = C12*epsilon11 + C22*epsilon22;
+%   Txy = C66*2*epsilon12; % watch out for factor of 2 for engineering strain
+%   PK2 = [Sx Txy;Txy Sy];
+%   PK1 = PK2*F'; 
+%   equations = -[ddx ddy]*PK1 + [0 -rho*g];
+%   %% plug in values
+%   % Material properties for Iron; E = 30e6 lbs/cm^2, nu = 0.3
+%   equations = subs(equations,{E,nu,rho,g},[30e6,0.3,0.00074,32.2*12]);
+%   if displayEquations
+%     display Equations_with_values
+%     pretty(equations');
+%   end
+%   variables = [u v];
+%   end
+%
+% Specify equations that are symbolically defined in
+% elasticitySymbolicFunction. Display equations is turned on by default.
+% _*Always verify that the equations corresponding to coefficients are what you
+% expect*_
+% 
+
+coeff = coeff.addCoeff('region','beamMaterial','symbolicEquationFunction',@elasticitySymbolicFunction); % requires Symbolic Math Toolbox
+%% Boundary conditions for linear problem
+%
+Load = -4; % Note: "-" sign for downward load
+% instantiate boundaryConditionObject for convenient definition of BCs
+bc = boundaryConditionObject(cantilever, N); % helper class
+% Dirichlet conditions are specified for wall. Other ways to specify BCs
+% are to specify for function for wall or to specify in terms of regions
+bc = bc.addBC('name','wall','dirichlet',[0;0]); % Dirichlet condition on wall
+% uniformly distributed load on the "free" boundary. Note: Reference 2 had
+% a point load but for demonstration purpose we use a distributed load that
+% should provide a close enough answer
+bc = bc.addBC('name','free','neumann',[0;Load/H]); 
+numNodes = size(cantilever.mesh.p,2);
+%% Linear solve
+% Using solution = 0, to set d/dx,d/dy terms in the C matrix to 0
+% effectively using the infinitesimal strain tensor (linear). Thus _we could have
+% used the linear tensor instead of the Green-Lagrange tensor_ .
+% However the purpose of this example is to demonstrate convenient symbolic processing of general
+% constitutive equations. Consequently the matrix form of assempde() in PDE
+% Toolbox is used to solve
+[Q,G,Hmat,R] = bc.getMatrices('u',zeros(N*numNodes,1)); % 'Hmat' because 'H' has alerady been defined
+[K,M,F] = coeff.getMatrices('u',zeros(N*numNodes,1));
+u=assempde(K,M,F,Q,G,Hmat,R); % use matrix form to solve
+%% Post process linear solution
+uu = reshape(u,numNodes,[]); % u is numNodes x 2
+LinearVerticalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,2)); % create a function from solution
+LinearHorizontalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,1)); % create a function from solution
+LinearVerticalDeflectionTip = LinearVerticalDeflectionxy(L-eps,H-eps); % vertical deflection
+LinearHorizontalDeflectionTip = LinearHorizontalDeflectionxy(L-eps,H-eps); % horizontal deflection
+fprintf('Linear solver: load = %e, Tip Y deflection = %e, Tip X deflection = %e\n',Load,LinearVerticalDeflectionTip,LinearHorizontalDeflectionTip);
+% make a copy of cantilever that we can adjust
+cantileverAfterLinearSolve = cantilever; 
+cantileverAfterLinearSolve.mesh.p(1:2,:) = cantileverAfterLinearSolve.mesh.p(1:2,:) + uu(:,1:2)'; % update geometry
+figure(1); cantileverAfterLinearSolve.plot('showMesh',true); axis equal;grid on; % show deflected beam
+title('linear deformed geometry');
+%% Solve using a nonlinear solver
+%
+% we could use pdenonlin() that uses an approximate jacobian but instead, we use a simple newton solver because in this example, we
+% have the exact jacobian available since we used a symbolic description of the equations.
+%
+% use a simple load stepping scheme to get the nonlinear solution
+lambda = 0;
+lambdastep = 0.05;
+verticalDeflectionTip = []; horizontalDeflectionTip = []; loads = [];
+iter = 1;
+while lambda <= 1
+    fprintf('iter = %d\n',iter);
+    lambda = min(1,lambda+lambdastep);
+    bc = boundaryConditionObject(cantilever, N); % helper class
+    % Dirichlet conditions are specified for wall. Other ways to specify BCs
+    % are to specify for function for wall or to specify in terms of regions
+    bc = bc.addBC('name','wall','dirichlet',[0;0]); % Dirichlet condition on wall
+    bc = bc.addBC('name','free','neumann',[0;lambda*Load/H]);
+    if iter == 1
+        [ucan,converged] = solveGeomNonlinear('coeff',coeff,'bc',bc); % first time, there is no initial guess
+    else
+        [ucan,converged] = solveGeomNonlinear('coeff',coeff,'bc',bc,'uinitial',u); % there is an initial guess
+    end
+    if converged
+        u = ucan;
+        uu = reshape(u(1:2*numNodes),numNodes,[]); % this is displacement
+        verticalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,2));
+        horizontalDeflectionxy = cantilever.createXYFunctionFromNodalSolution(uu(:,1));
+        verticalDeflectionTip = [verticalDeflectionTip verticalDeflectionxy(L-eps,H-eps)];
+        horizontalDeflectionTip = [horizontalDeflectionTip horizontalDeflectionxy(L-eps,H-eps)];
+        loads = [loads lambda*Load];
+        fprintf('NonLinear solver: load = %e, Tip Y deflection = %e, Tip X deflection = %e\n',loads(end), verticalDeflectionTip(end),horizontalDeflectionTip(end));
+        if lambda == 1
+            break;
+        end
+        iter = iter + 1;
+        lambdastep = lambdastep*2;
+    else
+        fprintf('step failed, rerunning with smaller step\n');
+        lambda = lambda - lambdastep;
+        lambdastep = lambdastep/1.2;
+    end
+end
+if converged    
+    cantileverAfterNonLinearSolve = cantilever; % make a copy of cantilever that we can adjust
+    cantileverAfterNonLinearSolve.mesh.p(1:2,:) = cantileverAfterNonLinearSolve.mesh.p(1:2,:) + uu'; % update geometry
+    % plot nonlinearly deformed cantilever
+    figure(2); cantileverAfterNonLinearSolve.plot('showMesh',true); axis equal;grid on;
+    title('nonlinear deformed geometry');
+    % Plot deformation curves as in Reference, we get a good match.
+    % The plots also show that linear analysis for this problem is not
+    % adequate
+    figure(3);
+    plot(abs(verticalDeflectionTip),abs(loads),'-ro',abs(horizontalDeflectionTip),abs(loads),'-ko',...
+        abs(LinearVerticalDeflectionTip/Load*loads),abs(loads),'-r*',abs(LinearHorizontalDeflectionTip/Load*loads),abs(loads),'-k*');
+        title('|Load| vs |Vertical and horizontal tip deflections| for linear and nonlinear cases');
+    legend('verticalNonlinear','horizontalNonlinear','verticalLinear','horizontalLinear','Location','SouthEast');
+end
+end
+##### SOURCE END #####
+--></body></html>

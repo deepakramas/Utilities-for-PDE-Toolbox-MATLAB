@@ -1,0 +1,171 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Example 3: Create arbitrary region out of arcs and lines</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-21"><meta name="DC.source" content="exampleGeometry3.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Example 3: Create arbitrary region out of arcs and lines</h1><p>Create a geometry that is defined by 2 arc boundaries and 1 line boundary. The inner region is 'regionA' and the exterior region is 'regionB'. The exterior region is not meshed.</p><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import package</span>
+<span class="comment">% Initial setting for mesh display</span>
+showMesh = true; <span class="comment">% show mesh in plots</span>
+
+<span class="comment">% Arc 1</span>
+<span class="comment">% Define center of arc</span>
+center = pointObject(0.76,-0.5);
+<span class="comment">% Define start and end points of arc</span>
+pt1 = pointObject(0.75,0.5);
+pt2 = pointObject(0.85,0.5);
+<span class="comment">% Define arc</span>
+la{1} = arcObject(<span class="string">'l1'</span>,<span class="string">'center'</span>,center,<span class="string">'startPoint'</span>,pt1,<span class="string">'endPoint'</span>,pt2);
+
+<span class="comment">% Arc 2</span>
+<span class="comment">% Define center</span>
+center = pointObject(0,0);
+<span class="comment">% Define start point</span>
+startPoint = la{1}.endPoint();
+<span class="comment">% Define angle of rotation relative to start point</span>
+rotationAngle = -pi/8; <span class="comment">% negative for clockwise</span>
+<span class="comment">% Define arc</span>
+la{2} = arcObject(<span class="string">'l2'</span>,<span class="string">'center'</span>,center,<span class="string">'startPoint'</span>,startPoint,<span class="string">'rotationAngle'</span>,rotationAngle);
+
+<span class="comment">% Line joining end point of arc 2 and start point of arc 1</span>
+la{3} = lineObject(<span class="string">'l3'</span>,la{2}.endPoint(),la{1}.startPoint());
+
+<span class="comment">% By setting left and right regions of boundaries, the inner and exterior regions are defined</span>
+<span class="keyword">for</span> k=1:3
+    la{k}.leftRegion = <span class="string">'regionB'</span>;
+    la{k}.rightRegion = <span class="string">'regionA'</span>;
+<span class="keyword">end</span>
+
+<span class="comment">% Define geometry</span>
+e3 = geometryObject(<span class="string">'arclineShape'</span>,la);
+
+<span class="comment">% Specify exterior region.</span>
+<span class="comment">% The exterior region is not meshed.</span>
+e3.exteriorRegion = <span class="string">'regionB'</span>;
+
+<span class="comment">% Rotate a bit around (0,0)</span>
+e3 = e3.rotate(pointObject(0,0),-pi/50);
+
+<span class="comment">% Make a copy so e3 can be used elsewhere</span>
+tmp = e3;
+
+<span class="comment">% Mesh</span>
+tmp.initMesh(<span class="string">'showMesh'</span>,showMesh);
+</pre><img vspace="5" hspace="5" src="exampleGeometry3_01.png" alt=""> <p>See help for <a href="matlab:doc('pdetbplus.pointObject')">pointObject</a> <a href="matlab:doc('pdetbplus.arcObject')">arcObject</a> <a href="matlab:doc('pdetbplus.lineObject')">lineObject</a> <a href="matlab:doc('pdetbplus.geometryObject')">geometryObject</a></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Example 3: Create arbitrary region out of arcs and lines
+% Create a geometry that is defined by 2 arc boundaries and 1 line boundary. The inner region is
+% 'regionA' and the exterior region is 'regionB'. The exterior region is not meshed.
+
+import pdetbplus.*; % import package
+% Initial setting for mesh display
+showMesh = true; % show mesh in plots
+
+% Arc 1
+% Define center of arc
+center = pointObject(0.76,-0.5);
+% Define start and end points of arc
+pt1 = pointObject(0.75,0.5);
+pt2 = pointObject(0.85,0.5);
+% Define arc
+la{1} = arcObject('l1','center',center,'startPoint',pt1,'endPoint',pt2);
+
+% Arc 2
+% Define center
+center = pointObject(0,0);
+% Define start point
+startPoint = la{1}.endPoint();
+% Define angle of rotation relative to start point
+rotationAngle = -pi/8; % negative for clockwise
+% Define arc
+la{2} = arcObject('l2','center',center,'startPoint',startPoint,'rotationAngle',rotationAngle);
+
+% Line joining end point of arc 2 and start point of arc 1
+la{3} = lineObject('l3',la{2}.endPoint(),la{1}.startPoint());
+
+% By setting left and right regions of boundaries, the inner and exterior regions are defined
+for k=1:3
+    la{k}.leftRegion = 'regionB';
+    la{k}.rightRegion = 'regionA';
+end
+
+% Define geometry
+e3 = geometryObject('arclineShape',la);
+
+% Specify exterior region.
+% The exterior region is not meshed.
+e3.exteriorRegion = 'regionB';
+
+% Rotate a bit around (0,0)
+e3 = e3.rotate(pointObject(0,0),-pi/50);
+
+% Make a copy so e3 can be used elsewhere
+tmp = e3;
+
+% Mesh
+tmp.initMesh('showMesh',showMesh);
+%%
+% See help for <matlab:doc('pdetbplus.pointObject') pointObject> <matlab:doc('pdetbplus.arcObject') arcObject> <matlab:doc('pdetbplus.lineObject') lineObject> <matlab:doc('pdetbplus.geometryObject') geometryObject>
+##### SOURCE END #####
+--></body></html>

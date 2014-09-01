@@ -1,0 +1,460 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>clamped</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-23"><meta name="DC.source" content="clamped.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Explore hole placement in clamped square plate</a></li><li><a href="#3">Plate parameters, geometry &amp; mesh</a></li><li><a href="#4">Set up boundary condition and coefficient functions</a></li><li><a href="#5">Loop through locations of hole in plate</a></li><li><a href="#7">Convert 4th order PDE to Elliptic PDE System</a></li><li><a href="#8">BCs</a></li><li><a href="#9">Coefficients</a></li><li><a href="#10">Linear solve</a></li><li><a href="#11">Post-process to get minimum deflection and deflection profile along plate diagonal</a></li><li><a href="#13">Calculate minimum deflection across all design points</a></li><li><a href="#14">Documentation of classes</a></li><li><a href="#16">More info and other examples</a></li></ul></div><h2>Explore hole placement in clamped square plate<a name="1"></a></h2><p><b>Introduction</b></p><p>This example is based on the reference: <a href="http://www.mathworks.com/matlabcentral/fileexchange/34870-deflection-of-a-square-plate-calculated-with-pde-toolbox">http://www.mathworks.com/matlabcentral/fileexchange/34870-deflection-of-a-square-plate-calculated-with-pde-toolbox</a>. The example -</p><div><ul><li>Explores the variation of minimum (max(abs()) deflection with the position of a small "punch hole" along the diagonal of the plate. The punch hole geometry is read from an image (requires Image Processing Toolbox) or alternatively a simple circular hole can be selected</li><li>Demonstrates an alternative solution for a 4th order PDE that avoids the numerical inaccuracy associated with the stiff-spring method of imposing BCs. The alternative solution assembles and solves for a large matrix that incorporates the FEM and constraint related matrices.</li></ul></div><p><img vspace="5" hspace="5" src="clampedHoleSchematic.PNG" alt=""> </p><p>It is recommended that the reference example be looked into first for background theory on this example.</p><p><b>Requirements:</b> PDE Toolbox, Helper classes for PDE Toolbox</p><p><b>Optional:</b> Image Processing Toolbox</p><pre class="codeinput"><span class="comment">%</span>
+<span class="keyword">function</span> [] = clamped
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import helper classes: geometryObject, boundary (lineObject etc), boundaryConditionObject and coeffsObject</span>
+</pre><h2>Plate parameters, geometry &amp; mesh<a name="3"></a></h2><pre class="codeinput">len = 10; <span class="comment">% dimension of square plate</span>
+
+<span class="comment">% translations of punch hole along diagonal of square</span>
+translations = [pointObject(0,0),pointObject(1,1),pointObject(1.5,1.5),pointObject(2,2),pointObject(2.5,2.5),pointObject(2.75,2.75)];
+plateWithoutHole = geometryObject.createSquare(<span class="string">'name'</span>,<span class="string">'plate'</span>,<span class="string">'edgeStartPoint'</span>,pointObject(0,0),<span class="string">'edgeEndPoint'</span>,pointObject(0,len),<span class="keyword">...</span>
+    <span class="string">'innerRegion'</span>,<span class="string">'plateMaterial'</span>,<span class="string">'outerRegion'</span>,<span class="string">'outer'</span>,<span class="string">'clockwise'</span>,true,<span class="string">'leaveOpen'</span>,false);
+
+<span class="comment">% collect names of plate-wall boundary segments. This is for setting BCs on the</span>
+<span class="comment">% plate-wall boundary</span>
+wallBoundaryNames = cell(length(plateWithoutHole.boundary),1);
+<span class="keyword">for</span> kk = 1:length(wallBoundaryNames)
+    wallBoundaryNames{kk} = plateWithoutHole.boundary{kk}.name;
+<span class="keyword">end</span>
+
+<span class="comment">% initialize minimum deflection vector</span>
+minDeflection = zeros(size(translations));
+</pre><h2>Set up boundary condition and coefficient functions<a name="4"></a></h2><pre class="codeinput">N = 2; <span class="comment">% dimension of problem</span>
+<span class="comment">% define BC along wall-plate boundary. The particular form of the BC is</span>
+<span class="comment">% explained later</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = bcondWall(x,y,u,t)
+        <span class="comment">% Dirichlet condition on the boundary</span>
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        hval(2,2) = 1;
+        <span class="comment">% A placeholder to find row numbers in global H corresponding to</span>
+        <span class="comment">% w - alpha = 0; r will be set to 0 later</span>
+        rval(2,1) = 1;
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    <span class="keyword">end</span>
+<span class="comment">% define coefficient functions</span>
+    <span class="keyword">function</span> cij = cCoeffPlate(x,y,u,ux,uy,time)
+        <span class="comment">% cij is an 2N x 2N matrix per the PDE Toolbox documentation</span>
+        cij = sparse(2*N,2*N);
+        cij(1:4,1:4) = sparse([1 0 0 0; 0 1 0 0; 0 0 D 0; 0 0 0 D]);
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> fi = fCoeffPlate(x,y,u,ux,uy,time)
+        <span class="comment">% fi is an N length vector</span>
+        fi = zeros(N,1);
+        fi(2) = pres;
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> aij = aCoeffPlate(x,y,u,ux,uy,time)
+        <span class="comment">% aij is an NxN matrix</span>
+        aij = sparse(N,N);
+        aij(1:2,1:2) = [-1 1;-D D];
+    <span class="keyword">end</span>
+</pre><h2>Loop through locations of hole in plate<a name="5"></a></h2><pre class="codeinput"><span class="keyword">for</span> k=1:length(translations)
+</pre><pre class="codeinput">    plate = plateWithoutHole;
+    useImage = true; <span class="comment">% set to false to use simple geometry (does not require Image Processing Toolbox)</span>
+    <span class="keyword">if</span> useImage
+        <span class="comment">% create geometry from punch hole pattern specified by image (requires</span>
+        <span class="comment">% Image Processing Toolbox)</span>
+        [openings,isClockwise] = geometryObject.createGeometriesFromImage(<span class="string">'image'</span>,<span class="string">'llapr.png'</span>);
+        opening = openings{1};
+        <span class="comment">% now that the image is created, this is scaled appropriately</span>
+        <span class="comment">% get current limits</span>
+        [xmin,ymin,xmax,ymax] = opening.getLimitsXY();
+        <span class="comment">% scale X limits</span>
+        opening = opening.scaleX(0.15*len/(xmax-xmin));
+        <span class="comment">% scale Y limits</span>
+        opening = opening.scaleY(0.15*len/(ymax-ymin));
+        <span class="comment">% get scaled limits</span>
+        [xmin,ymin,xmax,ymax] = opening.getLimitsXY();
+        <span class="comment">% translate to center of square</span>
+        opening = opening.translate(pointObject(len/2-xmin-(xmax-xmin)/2,len/2-ymin-(ymax-ymin)/2));
+        <span class="comment">% set interior and exterior regions</span>
+        opening = opening.setInteriorExteriorRegions(<span class="string">'outer'</span>,<span class="string">'plateMaterial'</span>,isClockwise);
+    <span class="keyword">else</span>
+        <span class="comment">% use a circle instead of image for hole</span>
+        opening = geometryObject.createCircle(<span class="string">'circularHole'</span>,pointObject(len/2,len/2),1,<span class="string">'outer'</span>,<span class="string">'plateMaterial'</span>);
+    <span class="keyword">end</span>
+    opening = opening.translate(translations(k));
+    plate = plate + opening; <span class="comment">% we are done with the geometry</span>
+    plate = plate.translate(pointObject(-len/2,-len/2)); <span class="comment">% center plate at (0,0)</span>
+    plate.exteriorRegion = <span class="string">'outer'</span>;
+    <span class="comment">% one can also pass any of the options for initmesh() in PDE Toolbox.</span>
+    <span class="comment">% Below we restrict Hmax to be 1/20th of the plate dimension</span>
+    plate = plate.initMesh(<span class="string">'showMesh'</span>,false, <span class="string">'numRefineMeshSteps'</span>,1,<span class="string">'Hmax'</span>,len/20);
+    <span class="comment">% Material properties</span>
+    E = 1e6; <span class="comment">% Modulus of elasticity</span>
+    gnu = 0.3; <span class="comment">% Poisson's ratio</span>
+    thick = 0.1; <span class="comment">% thickness of plate</span>
+    pres=2; <span class="comment">% external pressure</span>
+    D = E*thick^3/(12*(1-gnu^2));
+</pre><h2>Convert 4th order PDE to Elliptic PDE System<a name="7"></a></h2><p>The plate equation PDE is the 4th order PDE as in (A). It will be solved with an alternative method to the "stiff-spring" method of imposing BCs.</p><p>(A)</p><p><img src="clamped_eq62376.png" alt="$$\nabla^2(D\nabla^2 w) = p$$"></p><p>with BCs, <img src="clamped_eq96620.png" alt="$w = 0, \nabla w.\hat{n} = 0$"> on the wall-plate boundary. We do not explicitly specify BC for the plate-hole boundary since that boundary has natural BCs.</p><p>We introduce an intermediate variable <img src="clamped_eq77996.png" alt="$v$">, to convert (A) into an elliptic or 2nd order PDE system since the PDE Toobox does not handle 4th order PDEs directly. (A) is thus equivalently represented by (B), (C) and (D).</p><p><b>(B)</b></p><p><img src="clamped_eq49369.png" alt="$$\nabla^2 w = v - w$$"></p><p>with <img src="clamped_eq73168.png" alt="$\nabla w.\hat{n} = 0$"> on the plate-wall boundary. This form is chosen to make problem well posed with Neumann conditions. On the other hand the <img src="clamped_eq86413.png" alt="$\nabla^2 w = v$"> form is singular w.r.t. Neumann conditions on <img src="clamped_eq64535.png" alt="$w$">.</p><p><b>(C)</b></p><p><img src="clamped_eq00779.png" alt="$$D \nabla^2 v = D (v - w) + p$$"></p><p>with Dirichlet BC on the plate-wall boundary:</p><p><img src="clamped_eq08144.png" alt="$$v = \alpha = [\alpha_1;\alpha_2...]$$"></p><p>where <img src="clamped_eq87919.png" alt="$\alpha$"> is To Be Determined. <img src="clamped_eq87919.png" alt="$\alpha$"> is a numBoundaryNodes vector where numBoundaryNodes = # boundary nodes only on the <b>plate-wall</b> boundary</p><p><b>(D)</b></p><p><img src="clamped_eq89168.png" alt="$$w = 0$$"></p><p>on the plate-wall boundary. This Dirichlet BC is not enforced as a BC for (B) but instead needs to be imposed separately (because Neumann BC has already been imposed in (B)). Note that the alternative form described in (B) would have required the more unattractive prospect of setting Neumann BC to zero instead of the Dirichlet BC shown here.</p><p>New variables and equations equal to numBoundaryNodes in number are introduced in (C) and (D) respectively. Therefore the linear system corresponding to (B), (C) and (D) that we solve is</p><p><img src="clamped_eq78532.png" alt="$$\pmatrix{K+M &amp; H^T &amp; 0 \cr&#xA;H &amp; 0 &amp; I_\alpha\cr&#xA;I_w &amp; 0 &amp; 0 \cr&#xA;} \pmatrix{\pmatrix{w \cr v} \cr \lambda \cr \alpha \cr} = \pmatrix{F \cr 0}$$"></p><p>where</p><p><img src="clamped_eq23351.png" alt="$\lambda$"> is a 2*numBoundaryNodes vector of Lagrange multipliers (see PDE Toolbox documentation on pdebound()),</p><p><img src="clamped_eq16160.png" alt="$I_w$"> is a numBoundaryNodes <img src="clamped_eq28422.png" alt="$\times$"> 2*numNodes matrix where <img src="clamped_eq22467.png" alt="$I_w(i,j) = 1$"> if <img src="clamped_eq96058.png" alt="$j = i^{th}$"> <img src="clamped_eq64535.png" alt="$w$"> boundary node variable, <img src="clamped_eq12896.png" alt="$0$"> otherwise.</p><p><img src="clamped_eq77374.png" alt="$I_\alpha$"> is a 2*numBoundaryNodes <img src="clamped_eq28422.png" alt="$\times$"> numBoundaryNodes matrix where <img src="clamped_eq62062.png" alt="$I_\alpha (i,j) = 1$"> if <img src="clamped_eq15501.png" alt="$i = j^{th}$"> <img src="clamped_eq77996.png" alt="$v$"> boundary node variable, <img src="clamped_eq12896.png" alt="$0$"> otherwise.</p><p><img src="clamped_eq41634.png" alt="$K,M$"> are 2*numNodes <img src="clamped_eq28422.png" alt="$\times$"> 2*numNodes, <img src="clamped_eq67619.png" alt="$H$"> is 2*numBoundaryNodes <img src="clamped_eq28422.png" alt="$\times$"> numNodes, <img src="clamped_eq86924.png" alt="$F$"> is 2*numNodes <img src="clamped_eq28422.png" alt="$\times$"> <img src="clamped_eq80350.png" alt="$1$"> and are obtained from the FEM.</p><h2>BCs<a name="8"></a></h2><pre class="codeinput">    bc = boundaryConditionObject(plate, N); <span class="comment">% instantiate BC object</span>
+    <span class="keyword">for</span> kk = 1:length(wallBoundaryNames)
+        bc.add(<span class="string">'name'</span>,wallBoundaryNames{kk},<span class="string">'xyutFunction'</span>,@bcondWall);
+    <span class="keyword">end</span>
+</pre><h2>Coefficients<a name="9"></a></h2><pre class="codeinput">    coeff = coeffsObject(plate, N); <span class="comment">%instantiate coeffs object</span>
+    coeff.add(<span class="string">'region'</span>,<span class="string">'plateMaterial'</span>,<span class="string">'fiFunction'</span>,@fCoeffPlate,<span class="string">'cijFunction'</span>,@cCoeffPlate,<span class="string">'aijFunction'</span>,@aCoeffPlate);
+</pre><h2>Linear solve<a name="10"></a></h2><pre class="codeinput">    numNodes = size(plate.mesh.p,2);
+    u0 = zeros(N*numNodes,1);
+    [K,M,F] = coeff.getMatrices(<span class="string">'u'</span>,u0);
+    [~,~,H,R] = bc.getMatrices();
+    <span class="comment">% identify boundary nodes; cannot be done before meshing! and therefore</span>
+    <span class="comment">% cannot be specified outside the main loop</span>
+    boundaryNodes = [];
+    <span class="keyword">for</span> kk = 1:length(wallBoundaryNames)
+        boundaryNodes = [boundaryNodes plate.getBoundaryNodes(<span class="string">'name'</span>,wallBoundaryNames{kk})];
+    <span class="keyword">end</span>
+    boundaryNodes = unique(boundaryNodes); <span class="comment">% remove nodes common to these contiguous boundary segments</span>
+    numBoundaryNodes = length(boundaryNodes);
+    I_w = sparse(numBoundaryNodes,size(K,2));
+    I_w(:,boundaryNodes) = speye(numBoundaryNodes);
+    I_alpha = sparse(size(H,1),numBoundaryNodes);
+    I_alpha(R &gt; 0,:) = speye(numBoundaryNodes);
+    A = [K+M H' sparse(size(K,1),numBoundaryNodes)
+        H sparse(size(H,1),size(H,1)) I_alpha
+        I_w sparse(numBoundaryNodes,size(H,1)+numBoundaryNodes)];
+    B = [F;zeros(numBoundaryNodes+size(H,1),1)];
+    wvLambdaAlpha = A\B;
+    wv = wvLambdaAlpha(1:N*numNodes); <span class="comment">% extract w and v</span>
+</pre><h2>Post-process to get minimum deflection and deflection profile along plate diagonal<a name="11"></a></h2><pre class="codeinput">    numNodes = size(plate.mesh.p,2);
+    minDeflection(k) = min(wv(1:numNodes,1));
+    fprintf(<span class="string">'Transverse minimum deflection = %12.4e\n'</span>,minDeflection(k));
+    figure(1);
+    pdeplot(plate.mesh.p, plate.mesh.e, plate.mesh.t, <span class="string">'xydata'</span>, wv(1:numNodes), <span class="string">'contour'</span>, <span class="string">'on'</span>);
+    title <span class="string">'Transverse Deflection'</span>;
+    <span class="comment">% plot deflection along diagonal</span>
+    wxy = plate.createXYFunctionFromNodalSolution(wv(1:numNodes));
+    wdiagonal = @(x) wxy(x*cos(pi/4),x*sin(pi/4));
+    figure(3);
+    ezplot(wdiagonal,sqrt(2)*[-5,5]);
+</pre><pre class="codeoutput">Transverse minimum deflection =  -2.5031e-01
+</pre><img vspace="5" hspace="5" src="clamped_01.png" alt=""> <img vspace="5" hspace="5" src="clamped_02.png" alt=""> <pre class="codeoutput">Transverse minimum deflection =  -2.8463e-01
+</pre><img vspace="5" hspace="5" src="clamped_03.png" alt=""> <img vspace="5" hspace="5" src="clamped_04.png" alt=""> <pre class="codeoutput">Transverse minimum deflection =  -2.9050e-01
+</pre><img vspace="5" hspace="5" src="clamped_05.png" alt=""> <img vspace="5" hspace="5" src="clamped_06.png" alt=""> <pre class="codeoutput">Transverse minimum deflection =  -2.9148e-01
+</pre><img vspace="5" hspace="5" src="clamped_07.png" alt=""> <img vspace="5" hspace="5" src="clamped_08.png" alt=""> <pre class="codeoutput">Transverse minimum deflection =  -2.8695e-01
+</pre><img vspace="5" hspace="5" src="clamped_09.png" alt=""> <img vspace="5" hspace="5" src="clamped_10.png" alt=""> <pre class="codeoutput">Transverse minimum deflection =  -2.8380e-01
+</pre><img vspace="5" hspace="5" src="clamped_11.png" alt=""> <img vspace="5" hspace="5" src="clamped_12.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><h2>Calculate minimum deflection across all design points<a name="13"></a></h2><pre class="codeinput">[~,minIx] = min(minDeflection);
+fprintf(<span class="string">'Minimum Deflection occurs for Design point #%d\n'</span>,minIx);
+figure(2);
+bar(minDeflection);
+title <span class="string">'Minimum deflection against design point'</span>;
+</pre><pre class="codeoutput">Minimum Deflection occurs for Design point #4
+</pre><img vspace="5" hspace="5" src="clamped_13.png" alt=""> <h2>Documentation of classes<a name="14"></a></h2><p>See help for <a href="matlab:doc('pdetbplus.geometryObject')">geometryObject</a> <a href="matlab:doc('pdetbplus.pointObject')">pointObject</a> <a href="matlab:doc('pdetbplus.coeffsObject')">coeffsObject</a> <a href="matlab:doc('pdetbplus.boundaryConditionObject')">boundaryConditionObject</a></p><h2>More info and other examples<a name="16"></a></h2><p><a href="README.html">See other examples</a></p><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"> <br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Explore hole placement in clamped square plate
+% *Introduction*
+%
+% This example is based on the reference:
+% http://www.mathworks.com/matlabcentral/fileexchange/34870-deflection-of-a-square-plate-calculated-with-pde-toolbox.
+% The example -
+%
+% * Explores the variation of minimum (max(abs()) deflection with the
+% position of a small "punch hole" along the diagonal of the plate. The
+% punch hole geometry is read from an image (requires Image Processing
+% Toolbox) or alternatively a simple circular hole can be selected
+% * Demonstrates an alternative solution for a 4th order PDE that avoids the
+% numerical inaccuracy associated with the stiff-spring method of imposing BCs. The alternative solution assembles
+% and solves for a large matrix that incorporates the FEM and constraint related matrices.
+%
+%
+% <<clampedHoleSchematic.PNG>>
+%
+% It is recommended that the reference example be looked into first for
+% background theory on this example.
+%
+% *Requirements:* PDE Toolbox, Helper classes for PDE Toolbox
+%
+% *Optional:* Image Processing Toolbox
+%
+%  
+%
+function [] = clamped
+import pdetbplus.*; % import helper classes: geometryObject, boundary (lineObject etc), boundaryConditionObject and coeffsObject
+
+%% Plate parameters, geometry & mesh
+len = 10; % dimension of square plate
+
+% translations of punch hole along diagonal of square
+translations = [pointObject(0,0),pointObject(1,1),pointObject(1.5,1.5),pointObject(2,2),pointObject(2.5,2.5),pointObject(2.75,2.75)];
+plateWithoutHole = geometryObject.createSquare('name','plate','edgeStartPoint',pointObject(0,0),'edgeEndPoint',pointObject(0,len),...
+    'innerRegion','plateMaterial','outerRegion','outer','clockwise',true,'leaveOpen',false);
+
+% collect names of plate-wall boundary segments. This is for setting BCs on the
+% plate-wall boundary
+wallBoundaryNames = cell(length(plateWithoutHole.boundary),1);
+for kk = 1:length(wallBoundaryNames)
+    wallBoundaryNames{kk} = plateWithoutHole.boundary{kk}.name;
+end
+
+% initialize minimum deflection vector
+minDeflection = zeros(size(translations));
+
+%% Set up boundary condition and coefficient functions
+N = 2; % dimension of problem
+% define BC along wall-plate boundary. The particular form of the BC is
+% explained later
+    function [hval,rval,qval,gval] = bcondWall(x,y,u,t)
+        % Dirichlet condition on the boundary
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        hval(2,2) = 1;
+        % A placeholder to find row numbers in global H corresponding to
+        % w - alpha = 0; r will be set to 0 later
+        rval(2,1) = 1;
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    end
+% define coefficient functions
+    function cij = cCoeffPlate(x,y,u,ux,uy,time)
+        % cij is an 2N x 2N matrix per the PDE Toolbox documentation
+        cij = sparse(2*N,2*N);
+        cij(1:4,1:4) = sparse([1 0 0 0; 0 1 0 0; 0 0 D 0; 0 0 0 D]);
+    end
+    function fi = fCoeffPlate(x,y,u,ux,uy,time)
+        % fi is an N length vector
+        fi = zeros(N,1);
+        fi(2) = pres;
+    end
+    function aij = aCoeffPlate(x,y,u,ux,uy,time)
+        % aij is an NxN matrix
+        aij = sparse(N,N);
+        aij(1:2,1:2) = [-1 1;-D D];
+    end
+
+%% Loop through locations of hole in plate
+for k=1:length(translations)
+    plate = plateWithoutHole;
+    useImage = true; % set to false to use simple geometry (does not require Image Processing Toolbox)
+    if useImage
+        % create geometry from punch hole pattern specified by image (requires
+        % Image Processing Toolbox)
+        [openings,isClockwise] = geometryObject.createGeometriesFromImage('image','llapr.png');
+        opening = openings{1};
+        % now that the image is created, this is scaled appropriately
+        % get current limits
+        [xmin,ymin,xmax,ymax] = opening.getLimitsXY();
+        % scale X limits
+        opening = opening.scaleX(0.15*len/(xmax-xmin));
+        % scale Y limits
+        opening = opening.scaleY(0.15*len/(ymax-ymin));
+        % get scaled limits
+        [xmin,ymin,xmax,ymax] = opening.getLimitsXY();
+        % translate to center of square
+        opening = opening.translate(pointObject(len/2-xmin-(xmax-xmin)/2,len/2-ymin-(ymax-ymin)/2));
+        % set interior and exterior regions
+        opening = opening.setInteriorExteriorRegions('outer','plateMaterial',isClockwise);
+    else
+        % use a circle instead of image for hole
+        opening = geometryObject.createCircle('circularHole',pointObject(len/2,len/2),1,'outer','plateMaterial');
+    end
+    opening = opening.translate(translations(k));
+    plate = plate + opening; % we are done with the geometry
+    plate = plate.translate(pointObject(-len/2,-len/2)); % center plate at (0,0)
+    plate.exteriorRegion = 'outer';
+    % one can also pass any of the options for initmesh() in PDE Toolbox.
+    % Below we restrict Hmax to be 1/20th of the plate dimension
+    plate = plate.initMesh('showMesh',false, 'numRefineMeshSteps',1,'Hmax',len/20);
+    % Material properties
+    E = 1e6; % Modulus of elasticity
+    gnu = 0.3; % Poisson's ratio
+    thick = 0.1; % thickness of plate
+    pres=2; % external pressure
+    D = E*thick^3/(12*(1-gnu^2));
+
+    %% Convert 4th order PDE to Elliptic PDE System
+    % The plate equation PDE is the 4th order PDE as in (A). It will be solved with an alternative method to the "stiff-spring" method of imposing
+    % BCs.
+    %
+    % (A)
+    %
+    % $$\nabla^2(D\nabla^2 w) = p$$
+    %
+    % with BCs, $w = 0, \nabla w.\hat{n} = 0$ on the
+    % wall-plate boundary. We do not explicitly specify BC for the plate-hole
+    % boundary since that boundary has natural BCs.
+    %
+    % We introduce an intermediate variable $v$, to convert (A) into an elliptic or
+    % 2nd order PDE system since the PDE Toobox does not handle 4th order PDEs
+    % directly. (A) is thus equivalently represented by (B), (C) and (D).
+    %
+    % *(B)*
+    %
+    % $$\nabla^2 w = v - w$$
+    %
+    % with $\nabla w.\hat{n} = 0$ on the plate-wall boundary. This form is chosen to make problem well
+    % posed with Neumann conditions. On the other hand the $\nabla^2 w = v$ form 
+    % is singular w.r.t. Neumann conditions on $w$.
+    %
+    % *(C)*
+    %
+    % $$D \nabla^2 v = D (v - w) + p$$
+    %
+    % with Dirichlet BC on the plate-wall boundary:
+    %
+    % $$v = \alpha = [\alpha_1;\alpha_2...]$$
+    %
+    % where $\alpha$ is To
+    % Be Determined. $\alpha$ is a numBoundaryNodes vector where numBoundaryNodes = # boundary nodes 
+    % only on the *plate-wall* boundary
+    %
+    % *(D)*
+    %
+    % $$w = 0$$
+    %
+    % on the plate-wall boundary. This Dirichlet BC is not enforced as a
+    % BC for (B) but instead needs to be imposed separately (because Neumann BC has already been imposed in (B)).   
+    % Note that the alternative form described in (B) would have required the more
+    % unattractive prospect of setting Neumann BC to zero instead of the Dirichlet BC shown here.
+    %
+    % New variables and equations equal to numBoundaryNodes in number are
+    % introduced in (C) and (D) respectively. Therefore the linear
+    % system corresponding to (B), (C) and (D) that we solve is
+    %
+    % $$\pmatrix{K+M & H^T & 0 \cr
+    % H & 0 & I_\alpha\cr
+    % I_w & 0 & 0 \cr
+    % } \pmatrix{\pmatrix{w \cr v} \cr \lambda \cr \alpha \cr} = \pmatrix{F \cr 0}$$
+    %
+    % where
+    %
+    % $\lambda$ is a 2*numBoundaryNodes vector of Lagrange multipliers (see PDE Toolbox documentation on pdebound()),
+    %
+    % $I_w$ is a numBoundaryNodes $\times$ 2*numNodes matrix where $I_w(i,j) =
+    % 1$ if $j = i^{th}$ $w$ boundary node variable, $0$ otherwise.
+    %
+    % $I_\alpha$ is a 2*numBoundaryNodes $\times$ numBoundaryNodes matrix
+    % where $I_\alpha (i,j) = 1$ if $i = j^{th}$ $v$ boundary node variable, $0$ otherwise.
+    %
+    % $K,M$ are 2*numNodes $\times$ 2*numNodes, $H$ is 2*numBoundaryNodes
+    % $\times$ numNodes, $F$ is 2*numNodes $\times$ $1$ and are obtained from the FEM.
+    %
+    %% BCs
+    bc = boundaryConditionObject(plate, N); % instantiate BC object
+    for kk = 1:length(wallBoundaryNames)
+        bc.add('name',wallBoundaryNames{kk},'xyutFunction',@bcondWall);
+    end
+    %% Coefficients
+    coeff = coeffsObject(plate, N); %instantiate coeffs object
+    coeff.add('region','plateMaterial','fiFunction',@fCoeffPlate,'cijFunction',@cCoeffPlate,'aijFunction',@aCoeffPlate);
+    %% Linear solve
+    numNodes = size(plate.mesh.p,2);
+    u0 = zeros(N*numNodes,1);
+    [K,M,F] = coeff.getMatrices('u',u0);
+    [~,~,H,R] = bc.getMatrices();
+    % identify boundary nodes; cannot be done before meshing! and therefore
+    % cannot be specified outside the main loop
+    boundaryNodes = [];
+    for kk = 1:length(wallBoundaryNames)
+        boundaryNodes = [boundaryNodes plate.getBoundaryNodes('name',wallBoundaryNames{kk})];
+    end
+    boundaryNodes = unique(boundaryNodes); % remove nodes common to these contiguous boundary segments
+    numBoundaryNodes = length(boundaryNodes);
+    I_w = sparse(numBoundaryNodes,size(K,2));
+    I_w(:,boundaryNodes) = speye(numBoundaryNodes);
+    I_alpha = sparse(size(H,1),numBoundaryNodes);
+    I_alpha(R > 0,:) = speye(numBoundaryNodes);
+    A = [K+M H' sparse(size(K,1),numBoundaryNodes)
+        H sparse(size(H,1),size(H,1)) I_alpha
+        I_w sparse(numBoundaryNodes,size(H,1)+numBoundaryNodes)];
+    B = [F;zeros(numBoundaryNodes+size(H,1),1)];
+    wvLambdaAlpha = A\B;
+    wv = wvLambdaAlpha(1:N*numNodes); % extract w and v
+    %% Post-process to get minimum deflection and deflection profile along plate diagonal
+    numNodes = size(plate.mesh.p,2);
+    minDeflection(k) = min(wv(1:numNodes,1));
+    fprintf('Transverse minimum deflection = %12.4e\n',minDeflection(k));
+    figure(1);
+    pdeplot(plate.mesh.p, plate.mesh.e, plate.mesh.t, 'xydata', wv(1:numNodes), 'contour', 'on');
+    title 'Transverse Deflection';
+    % plot deflection along diagonal
+    wxy = plate.createXYFunctionFromNodalSolution(wv(1:numNodes));
+    wdiagonal = @(x) wxy(x*cos(pi/4),x*sin(pi/4));
+    figure(3);
+    ezplot(wdiagonal,sqrt(2)*[-5,5]);
+end
+
+%% Calculate minimum deflection across all design points
+[~,minIx] = min(minDeflection);
+fprintf('Minimum Deflection occurs for Design point #%d\n',minIx);
+figure(2);
+bar(minDeflection);
+title 'Minimum deflection against design point';
+
+%% Documentation of classes
+%%
+% See help for <matlab:doc('pdetbplus.geometryObject') geometryObject>
+% <matlab:doc('pdetbplus.pointObject') pointObject> <matlab:doc('pdetbplus.coeffsObject')
+% coeffsObject> <matlab:doc('pdetbplus.boundaryConditionObject') boundaryConditionObject>
+
+%% More info and other examples
+%%
+% <README.html See other examples>
+end
+##### SOURCE END #####
+--></body></html>

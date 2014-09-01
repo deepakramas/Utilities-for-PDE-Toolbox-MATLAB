@@ -1,0 +1,446 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>exampleConvectionDiffusion</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-09-06"><meta name="DC.source" content="exampleConvectionDiffusion.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Dealing with Convection Diffusion problems in PDE Toolbox 12b and earlier</a></li><li><a href="#3">Create geometry</a></li><li><a href="#4">Define boundary conditions using boundaryConditionObject class</a></li><li><a href="#5">Define coefficients</a></li><li><a href="#6">Adaptively solve till the y = 0 curve near the boundary layer region appears to stabilize.</a></li></ul></div><h2>Dealing with Convection Diffusion problems in PDE Toolbox 12b and earlier<a name="1"></a></h2><p>PDE Toolbox in general does not handle convection-diffusion problems reliably because of the weakness of the Galerkin formulation in handling the boundary layer (See reference).</p><p>Take the 1-D equation : <img src="exampleConvectionDiffusion_eq36131.png" alt="$-\epsilon u'' + u' = 0$"> on [0,1] with <img src="exampleConvectionDiffusion_eq58064.png" alt="$u(0) = 1$"> and <img src="exampleConvectionDiffusion_eq55427.png" alt="$u(1) = 2$">.</p><p>If <img src="exampleConvectionDiffusion_eq97780.png" alt="$\epsilon$"> is large, then PDE Toolbox can provide an accurate answer but if epsilon is small (compared to the convective term, <img src="exampleConvectionDiffusion_eq16001.png" alt="$u'$">, with a coefficient of 1) then it is difficult to use the Toolbox since we have the boundary layer to deal with. The example below shows an approach that while not robust, is intended to show how the Toolbox as of 2012b can be used.</p><p>The 1-D problem is converted to a 2D problem for use with the PDE Toolbox by setting the flux in the y direction to be 0.</p><p>Reference : <a href="http://www.math.vt.edu/people/adjerids/FlahertyFEMnotes/fem9.pdf">http://www.math.vt.edu/people/adjerids/FlahertyFEMnotes/fem9.pdf</a></p><pre class="codeinput"><span class="keyword">function</span> [] = exampleConvectionDiffusion()
+</pre><pre class="codeinput">import <span class="string">pdetbplus.*</span>; <span class="comment">% import package for accessing the geometryObject, boundaryConditionObject and coeffsObject classes</span>
+epsilon = 1e-3;
+</pre><h2>Create geometry<a name="3"></a></h2><p>Add a boundary layer that is <img src="exampleConvectionDiffusion_eq70429.png" alt="$10*\epsilon$">; The Peclet number, <img src="exampleConvectionDiffusion_eq24337.png" alt="$h/(2*\epsilon)$"> where <img src="exampleConvectionDiffusion_eq60012.png" alt="$h$"> is grid spacing, should be &lt;&lt; 1 number (See reference). This boundary layer is needed for a convergent solution. One can think of adding the boundary layer geometry as providing a constraint to the adaptive meshing</p><pre class="codeinput">withBoundaryLayer = true;
+<span class="keyword">if</span> ~withBoundaryLayer
+    pts{1} = pointObject(0,0); pts{2} = pointObject(0,1); pts{3} = pointObject(1,1); pts{4} = pointObject(1,0);
+    rightRegions{1} = <span class="string">'in1'</span>;
+    rightRegions{2} = <span class="string">'in2'</span>;
+    rightRegions{3} = <span class="string">'in3'</span>;
+    rightRegions{4} = <span class="string">'in4'</span>;
+    square = geometryObject.createPolygon(<span class="string">'foo'</span>,pts,<span class="string">'out'</span>,rightRegions,true,false,pointObject(0.5,0.5));
+<span class="keyword">else</span>
+    boundaryLayerThickness = 10*epsilon;
+    pts1{1} = pointObject(0,0); pts1{2} = pointObject(0,1); pts1{3} = pointObject(1-boundaryLayerThickness,1); pts1{4} = pointObject(1-boundaryLayerThickness,0);
+    rightRegions{1} = <span class="string">'in1'</span>; leftRegions{1} = <span class="string">'out'</span>;
+    rightRegions{2} = <span class="string">'in2'</span>; leftRegions{2} = <span class="string">'out'</span>;
+    rightRegions{3} = <span class="string">'in3'</span>; leftRegions{3} = <span class="string">'in5'</span>;
+    rightRegions{4} = <span class="string">'in4'</span>; leftRegions{4} = <span class="string">'out'</span>;
+    <span class="comment">% leftPart that has a coarser mesh</span>
+    leftPart = geometryObject.createPolygon(<span class="string">'foo'</span>,pts1,leftRegions,rightRegions,true,false,pointObject((1-boundaryLayerThickness)/2,0.5));
+    rightRegions{5} = <span class="string">'in6'</span>; rightRegions{6} = <span class="string">'in7'</span>; rightRegions{7} = <span class="string">'in8'</span>; rightRegions{8} = <span class="string">'in5'</span>;
+    rr{1} = rightRegions{5}; rr{2} = rightRegions{6}; rr{3} = rightRegions{7}; rr{4} = rightRegions{8};
+    pts2{1} = pts1{3}; pts2{2} = pointObject(1,1); pts2{3} = pointObject(1,0); pts2{4} = pts1{4};
+    <span class="comment">% rightPart that has a finer mesh</span>
+    rightPart = geometryObject.createPolygon(<span class="string">'foo'</span>,pts2,<span class="string">'out'</span>,rr,true,true,pointObject(1-boundaryLayerThickness/2,0.5));
+    square = leftPart + rightPart;
+<span class="keyword">end</span>
+square.exteriorRegion = <span class="string">'out'</span>;
+square = square.initMesh(<span class="string">'numRefineMeshSteps'</span>,0);
+<span class="comment">% Set dimension of the problem to 1</span>
+N = 1;
+</pre><h2>Define boundary conditions using boundaryConditionObject class<a name="4"></a></h2><p>Instantiate boundary condition object</p><pre class="codeinput">bc = boundaryConditionObject(square,N);
+<span class="comment">% Define function for Dirichlet</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = dirichlet2(x,y,u,t) <span class="comment">% receive x,y,u at boundary edge points</span>
+        rval = 2*ones(N,1);
+        hval = speye(N,N); <span class="comment">% diagnoal 1</span>
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = dirichlet1(x,y,u,t) <span class="comment">% receive x,y,u at boundary edge points</span>
+        rval = 1*ones(N,1);
+        hval = speye(N,N);
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> [hval,rval,qval,gval] = neumann(x,y,u,t) <span class="comment">% receive x,y,u at boundary edge points</span>
+        <span class="comment">% do nothing; could also do rval = hval = qval = gval = [];</span>
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    <span class="keyword">end</span>
+<span class="keyword">if</span> ~withBoundaryLayer
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in1'</span>,<span class="string">'xyutFunction'</span>,@dirichlet1);
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in3'</span>,<span class="string">'xyutFunction'</span>,@dirichlet2);
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in2'</span>,<span class="string">'xyutFunction'</span>,@neumann);
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in4'</span>,<span class="string">'xyutFunction'</span>,@neumann);
+<span class="keyword">else</span>
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in1'</span>,<span class="string">'xyutFunction'</span>,@dirichlet1); <span class="comment">% "left"</span>
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in7'</span>,<span class="string">'xyutFunction'</span>,@dirichlet2); <span class="comment">% "right"</span>
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in2'</span>,<span class="string">'xyutFunction'</span>,@neumann); <span class="comment">% "top"</span>
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in4'</span>,<span class="string">'xyutFunction'</span>,@neumann); <span class="comment">% "top"</span>
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in6'</span>,<span class="string">'xyutFunction'</span>,@neumann); <span class="comment">% "top"</span>
+    bc = bc.addBC(<span class="string">'outerRegion'</span>,<span class="string">'out'</span>,<span class="string">'innerRegion'</span>,<span class="string">'in8'</span>,<span class="string">'xyutFunction'</span>,@neumann); <span class="comment">% "top"</span>
+<span class="keyword">end</span>
+</pre><h2>Define coefficients<a name="5"></a></h2><pre class="codeinput">coeffs = coeffsObject(square,N);
+    <span class="keyword">function</span> cij = cCoeff(x,y,u,ux,uy,time) <span class="comment">% receive x,y,y,ux,uy at centroids</span>
+        <span class="comment">% cij is an 2N x 2N matrix : [d/dx*c11*d/dx, d/dx*c12*d/dy; d/</span>
+        <span class="comment">% d/dy*c21*d/dx, d/dy*c22*d/dy] where the "c"'s are per the PDE</span>
+        <span class="comment">% Toolbox documentation</span>
+        cij = [epsilon 0; 0 1];
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> fi = fCoeff(x,y,u,ux,uy,time) <span class="comment">% receive x,y,y,ux,uy at centroids</span>
+        <span class="comment">% fi is an N length vector; nth row corresponds to entry for nth</span>
+        <span class="comment">% output equation</span>
+        fi = zeros(N,1);
+        fi(1,1) = -ux;
+    <span class="keyword">end</span>
+    <span class="keyword">function</span> aij = aCoeff(x,y,u,ux,uy,time) <span class="comment">% receive x,y,y,ux,uy at centroids</span>
+        <span class="comment">% aij is an N x N matrix; (m,n) entry in aij corresponds to the</span>
+        <span class="comment">% contribution of the nth output dimension variable to mth output</span>
+        <span class="comment">% equation</span>
+        aij = zeros(N,N);
+    <span class="keyword">end</span>
+<span class="keyword">for</span> k=1:length(rightRegions)
+    coeffs = coeffs.addCoeff(<span class="string">'region'</span>,rightRegions{k},<span class="string">'fiFunction'</span>,@fCoeff,<span class="string">'cijFunction'</span>,@cCoeff,<span class="string">'aijFunction'</span>,@aCoeff);
+<span class="keyword">end</span>
+</pre><h2>Adaptively solve till the y = 0 curve near the boundary layer region appears to stabilize.<a name="6"></a></h2><p>This approach is <b>only</b> acceptable for what is essentially a 1-D problem here. However, in general, this approach should not be used. Ideally the adaptive mesh should be let to run to terminate on its own with a converged solution</p><pre class="codeinput">xRange = (0:0.001:1);
+uprev = @(x) 0;
+absuintprev = 0;
+u0 = zeros(size(square.mesh.p,2),1);
+numTries = 20;
+<span class="keyword">for</span> k=1:numTries
+    [u,p,e,t] = adaptmesh(@square.geometryFunction,@bc.bcFunction,@coeffs.cFunction,@coeffs.aFunction,@coeffs.fFunction,<span class="string">'Init'</span>,u0,<span class="keyword">...</span>
+        <span class="string">'Nonlin'</span>,<span class="string">'on'</span>,<span class="string">'Jac'</span>,<span class="string">'full'</span>,<span class="string">'Ngen'</span>,1,<span class="string">'Rmethod'</span>,<span class="string">'regular'</span>,<span class="string">'Mesh'</span>,square.mesh.p,square.mesh.e,square.mesh.t);
+    square.mesh = meshObject(<span class="string">'p'</span>,p,<span class="string">'e'</span>,e,<span class="string">'t'</span>,t);
+    uatxy = square.createXYFunctionFromNodalSolution(u);
+    uatxy0 = @(x) uatxy(x,eps); <span class="comment">% for plot at y = 0</span>
+    errorf = @(x) abs(uatxy0(x) - uprev(x));
+    errorint = integral(errorf,0.9,1);
+    absuint = integral(@(x) abs(uatxy0(x)),0.9,1);
+    figure(1);
+    title <span class="string">'int(|unew - uold|) between [0.9,1]'</span>; hold <span class="string">on</span>;
+    plot(size(t,2),log(errorint),<span class="string">'k*'</span>);
+    <span class="keyword">if</span> errorint &lt; 1e-4*max(1e-10,absuintprev)
+        fprintf(<span class="string">'y = 0 curve has appeared to converge. ||unew-uold||/||uold|| = %e\n'</span>,errorint/max(1e-6,absuintprev));
+        figure(2);
+        title <span class="string">'y = 0'</span>;<span class="comment">% plot y = constant curves</span>
+        plot(xRange,uatxy0(xRange),<span class="string">'k'</span>);
+        figure(3);
+        square.plot(<span class="string">'showMesh'</span>,true); <span class="comment">% plot final mesh</span>
+        <span class="keyword">break</span>;
+    <span class="keyword">else</span>
+        fprintf(<span class="string">'y = 0 curve has not converged. ||unew-uold||/||uold|| = %e.  Continue to call adaptmesh ....\n'</span>,errorint/max(1e-6,absuintprev));
+        uprev = uatxy0;
+        absuintprev = absuint;
+        u0 = u;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Number of triangles: 732
+Number of triangles: 782
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.018159e+05.  Continue to call adaptmesh ....
+Number of triangles: 782
+Number of triangles: 922
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.377744e-03.  Continue to call adaptmesh ....
+Number of triangles: 922
+Number of triangles: 1530
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.068839e-02.  Continue to call adaptmesh ....
+Number of triangles: 1530
+Number of triangles: 1696
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 6.150139e-04.  Continue to call adaptmesh ....
+Number of triangles: 1696
+Number of triangles: 1714
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 3.431870e-04.  Continue to call adaptmesh ....
+Number of triangles: 1714
+Number of triangles: 1804
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 3.689588e-04.  Continue to call adaptmesh ....
+Number of triangles: 1804
+Number of triangles: 2109
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 3.876102e-02.  Continue to call adaptmesh ....
+Number of triangles: 2109
+Number of triangles: 2209
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.447074e-02.  Continue to call adaptmesh ....
+Number of triangles: 2209
+Number of triangles: 2729
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.274601e-02.  Continue to call adaptmesh ....
+Number of triangles: 2729
+Number of triangles: 3167
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.720302e-03.  Continue to call adaptmesh ....
+Number of triangles: 3167
+Number of triangles: 3773
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.509453e-03.  Continue to call adaptmesh ....
+Number of triangles: 3773
+Number of triangles: 4365
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 2.196001e-03.  Continue to call adaptmesh ....
+Number of triangles: 4365
+Number of triangles: 5518
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 2.195212e-03.  Continue to call adaptmesh ....
+Number of triangles: 5518
+Number of triangles: 5692
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 3.157355e-04.  Continue to call adaptmesh ....
+Number of triangles: 5692
+Number of triangles: 7202
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 9.952747e-04.  Continue to call adaptmesh ....
+Number of triangles: 7202
+Number of triangles: 8751
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 9.508982e-04.  Continue to call adaptmesh ....
+Number of triangles: 8751
+Number of triangles: 10508
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 6.294314e-04.  Continue to call adaptmesh ....
+Number of triangles: 10508
+Number of triangles: 10593
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.064359e-03.  Continue to call adaptmesh ....
+Number of triangles: 10593
+Number of triangles: 10762
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 1.041786e-03.  Continue to call adaptmesh ....
+Number of triangles: 10762
+Number of triangles: 11324
+
+Maximum number of refinement passes obtained.
+y = 0 curve has not converged. ||unew-uold||/||uold|| = 7.484799e-04.  Continue to call adaptmesh ....
+</pre><img vspace="5" hspace="5" src="exampleConvectionDiffusion_01.png" alt=""> <pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Dealing with Convection Diffusion problems in PDE Toolbox 12b and earlier
+% PDE Toolbox in general does not handle convection-diffusion problems
+% reliably because of the weakness of the Galerkin formulation in handling the
+% boundary layer (See reference).
+%
+% Take the 1-D equation : $-\epsilon u'' + u' = 0$ on [0,1]
+% with $u(0) = 1$ and $u(1) = 2$. 
+% 
+% If $\epsilon$ is large, then PDE Toolbox can
+% provide an accurate answer but if epsilon is small (compared to the
+% convective term, $u'$, with a
+% coefficient of 1) then it is difficult to use the Toolbox since we have the boundary
+% layer to deal with. The example below shows an approach that while not robust, is intended to show how the Toolbox as of 2012b can be
+% used.
+%
+% The 1-D problem is converted to a 2D problem for use with
+% the PDE Toolbox by setting the flux in the y direction to be 0.
+%
+% Reference : http://www.math.vt.edu/people/adjerids/FlahertyFEMnotes/fem9.pdf
+%
+function [] = exampleConvectionDiffusion()
+import pdetbplus.*; % import package for accessing the geometryObject, boundaryConditionObject and coeffsObject classes
+epsilon = 1e-3;
+%% Create geometry
+%
+% Add a boundary layer that is $10*\epsilon$; The Peclet number, $h/(2*\epsilon)$ where $h$ is grid spacing, should be << 1
+% number (See reference). This boundary layer is needed for a convergent solution. One can think of
+% adding the boundary layer geometry as providing a constraint to the adaptive
+% meshing
+withBoundaryLayer = true;
+if ~withBoundaryLayer
+    pts{1} = pointObject(0,0); pts{2} = pointObject(0,1); pts{3} = pointObject(1,1); pts{4} = pointObject(1,0);
+    rightRegions{1} = 'in1';
+    rightRegions{2} = 'in2';
+    rightRegions{3} = 'in3';
+    rightRegions{4} = 'in4';
+    square = geometryObject.createPolygon('foo',pts,'out',rightRegions,true,false,pointObject(0.5,0.5));
+else
+    boundaryLayerThickness = 10*epsilon;
+    pts1{1} = pointObject(0,0); pts1{2} = pointObject(0,1); pts1{3} = pointObject(1-boundaryLayerThickness,1); pts1{4} = pointObject(1-boundaryLayerThickness,0);
+    rightRegions{1} = 'in1'; leftRegions{1} = 'out';
+    rightRegions{2} = 'in2'; leftRegions{2} = 'out';
+    rightRegions{3} = 'in3'; leftRegions{3} = 'in5';
+    rightRegions{4} = 'in4'; leftRegions{4} = 'out';
+    % leftPart that has a coarser mesh
+    leftPart = geometryObject.createPolygon('foo',pts1,leftRegions,rightRegions,true,false,pointObject((1-boundaryLayerThickness)/2,0.5));
+    rightRegions{5} = 'in6'; rightRegions{6} = 'in7'; rightRegions{7} = 'in8'; rightRegions{8} = 'in5';
+    rr{1} = rightRegions{5}; rr{2} = rightRegions{6}; rr{3} = rightRegions{7}; rr{4} = rightRegions{8};
+    pts2{1} = pts1{3}; pts2{2} = pointObject(1,1); pts2{3} = pointObject(1,0); pts2{4} = pts1{4};
+    % rightPart that has a finer mesh
+    rightPart = geometryObject.createPolygon('foo',pts2,'out',rr,true,true,pointObject(1-boundaryLayerThickness/2,0.5));
+    square = leftPart + rightPart;
+end
+square.exteriorRegion = 'out';
+square = square.initMesh('numRefineMeshSteps',0);
+% Set dimension of the problem to 1
+N = 1;
+%% Define boundary conditions using boundaryConditionObject class
+%
+% Instantiate boundary condition object
+bc = boundaryConditionObject(square,N);
+% Define function for Dirichlet
+    function [hval,rval,qval,gval] = dirichlet2(x,y,u,t) % receive x,y,u at boundary edge points
+        rval = 2*ones(N,1);
+        hval = speye(N,N); % diagnoal 1
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    end
+    function [hval,rval,qval,gval] = dirichlet1(x,y,u,t) % receive x,y,u at boundary edge points
+        rval = 1*ones(N,1);
+        hval = speye(N,N);
+        qval = sparse(N,N);
+        gval = zeros(N,1);
+    end
+    function [hval,rval,qval,gval] = neumann(x,y,u,t) % receive x,y,u at boundary edge points
+        % do nothing; could also do rval = hval = qval = gval = [];
+        rval = zeros(N,1);
+        hval = sparse(N,N);
+        qval = sparse(N,N);
+        gval = zeros(N,1); 
+    end
+if ~withBoundaryLayer
+    bc = bc.addBC('outerRegion','out','innerRegion','in1','xyutFunction',@dirichlet1);
+    bc = bc.addBC('outerRegion','out','innerRegion','in3','xyutFunction',@dirichlet2);
+    bc = bc.addBC('outerRegion','out','innerRegion','in2','xyutFunction',@neumann);
+    bc = bc.addBC('outerRegion','out','innerRegion','in4','xyutFunction',@neumann);
+else
+    bc = bc.addBC('outerRegion','out','innerRegion','in1','xyutFunction',@dirichlet1); % "left"
+    bc = bc.addBC('outerRegion','out','innerRegion','in7','xyutFunction',@dirichlet2); % "right"      
+    bc = bc.addBC('outerRegion','out','innerRegion','in2','xyutFunction',@neumann); % "top"
+    bc = bc.addBC('outerRegion','out','innerRegion','in4','xyutFunction',@neumann); % "top"
+    bc = bc.addBC('outerRegion','out','innerRegion','in6','xyutFunction',@neumann); % "top"
+    bc = bc.addBC('outerRegion','out','innerRegion','in8','xyutFunction',@neumann); % "top"
+end
+%% Define coefficients
+coeffs = coeffsObject(square,N);
+    function cij = cCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+        % cij is an 2N x 2N matrix : [d/dx*c11*d/dx, d/dx*c12*d/dy; d/
+        % d/dy*c21*d/dx, d/dy*c22*d/dy] where the "c"'s are per the PDE
+        % Toolbox documentation
+        cij = [epsilon 0; 0 1];
+    end
+    function fi = fCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+        % fi is an N length vector; nth row corresponds to entry for nth
+        % output equation
+        fi = zeros(N,1);
+        fi(1,1) = -ux;
+    end
+    function aij = aCoeff(x,y,u,ux,uy,time) % receive x,y,y,ux,uy at centroids
+        % aij is an N x N matrix; (m,n) entry in aij corresponds to the
+        % contribution of the nth output dimension variable to mth output
+        % equation
+        aij = zeros(N,N);
+    end
+for k=1:length(rightRegions)
+    coeffs = coeffs.addCoeff('region',rightRegions{k},'fiFunction',@fCoeff,'cijFunction',@cCoeff,'aijFunction',@aCoeff);
+end
+%% Adaptively solve till the y = 0 curve near the boundary layer region appears to stabilize.
+%
+% This approach is *only* acceptable for what is essentially a 1-D problem here. 
+% However, in general, this approach should not be used. Ideally the adaptive mesh should be let to run to terminate on its own with a converged solution
+xRange = (0:0.001:1);
+uprev = @(x) 0;
+absuintprev = 0;
+u0 = zeros(size(square.mesh.p,2),1);
+numTries = 20;
+for k=1:numTries    
+    [u,p,e,t] = adaptmesh(@square.geometryFunction,@bc.bcFunction,@coeffs.cFunction,@coeffs.aFunction,@coeffs.fFunction,'Init',u0,...
+        'Nonlin','on','Jac','full','Ngen',1,'Rmethod','regular','Mesh',square.mesh.p,square.mesh.e,square.mesh.t);
+    square.mesh = meshObject('p',p,'e',e,'t',t);
+    uatxy = square.createXYFunctionFromNodalSolution(u);
+    uatxy0 = @(x) uatxy(x,eps); % for plot at y = 0
+    errorf = @(x) abs(uatxy0(x) - uprev(x));
+    errorint = integral(errorf,0.9,1);
+    absuint = integral(@(x) abs(uatxy0(x)),0.9,1);
+    figure(1); 
+    title 'int(|unew - uold|) between [0.9,1]'; hold on;
+    plot(size(t,2),log(errorint),'k*');
+    if errorint < 1e-4*max(1e-10,absuintprev)
+        fprintf('y = 0 curve has appeared to converge. ||unew-uold||/||uold|| = %e\n',errorint/max(1e-6,absuintprev));        
+        figure(2); 
+        title 'y = 0';% plot y = constant curves
+        plot(xRange,uatxy0(xRange),'k');
+        figure(3);
+        square.plot('showMesh',true); % plot final mesh        
+        break;
+    else
+        fprintf('y = 0 curve has not converged. ||unew-uold||/||uold|| = %e.  Continue to call adaptmesh ....\n',errorint/max(1e-6,absuintprev));
+        uprev = uatxy0;
+        absuintprev = absuint;
+        u0 = u;
+    end
+end
+end
+
+##### SOURCE END #####
+--></body></html>
